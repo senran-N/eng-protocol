@@ -1,6 +1,6 @@
 /**
  * eng-protocol — guides the agent to follow the Autonomous Engineering Agent Protocol (protocol.md)
- * before it acts. It never blocks or rewrites tool calls; the model keeps full autonomy.
+ * before it acts; the model keeps full autonomy over every tool call.
  *
  * - before_agent_start:  protocol + project rules as system prompt sections (stable, cached)
  * - context_with_system: before every model request, the decision model (eng-protocol.json `decision`)

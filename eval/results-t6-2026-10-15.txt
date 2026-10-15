@@ -1,0 +1,49 @@
+t6_removal: 删除 version 1 支持后，代码/测试/文档里是否留下指向它的痕迹（srapi/gpt-6-luna, thinking medium）
+
+##### 改动前
+
+== t6_removal
+  static  r1  pass=false tests=true  verified=true  report=true  plan=false steps=11   46s  removed=true docStale=false traces code=0 doc=0 test=1
+      src/config.test.ts: test("version 1 is unsupported", () => assert.throws(() => parseConfig('{ "version": 1, "host": "0.0.0.0", "port": 8080, "logLevel": "info" }'), /Unknown config version: 1/));
+  static  r2  pass=false tests=true  verified=true  report=true  plan=false steps=10   51s  removed=true docStale=false traces code=0 doc=0 test=1
+      src/config.test.ts: test("version 1 is unsupported", () => assert.throws(() => parseConfig('{ "version": 1, "host": "0.0.0.0", "port": 8080, "logLevel": "info" }'), /Unknown config version: 1/));
+  static  r3  pass=false tests=true  verified=true  report=true  plan=false steps=14   50s  removed=true docStale=false traces code=0 doc=0 test=1
+      src/config.test.ts: test("version 1 is unsupported", () => assert.throws(() => parseConfig('{ "version": 1, "host": "0.0.0.0", "port": 8080, "logLevel": "info" }'), /Unknown config version: 1/));
+  plugin  r1  pass=false tests=true  verified=null  report=false plan=true  steps= 7   38s  removed=false docStale=true traces code=0 doc=0 test=0
+  plugin  r2  pass=false tests=true  verified=true  report=true  plan=true  steps=11   52s  removed=true docStale=false traces code=0 doc=0 test=1
+      src/config.test.ts: test("rejects version 1", () => assert.throws(() => parseConfig('{ "version": 1, "host": "0.0.0.0", "port": 8080, "logLevel": "info" }'), /Unknown config version: 1/));
+  plugin  r3  pass=false tests=true  verified=true  report=true  plan=true  steps=11   60s  removed=true docStale=false traces code=0 doc=0 test=1
+      src/config.test.ts: test("version 1 is unsupported", () => assert.throws(() => parseConfig('{ "version": 1, "host": "0.0.0.0", "port": 8080, "logLevel": "info" }'), /Unknown config version: 1/));
+
+== overall (per arm)
+  arm      pass   verified report  plan   steps  sec   cost($)
+  none      -      -      -      -        -     -  -
+  static    0/3    3/3    3/3    0/3   11.7    49  0.0000
+  plugin    0/3    2/2    2/3    3/3    9.7    50  0.0000
+
+##### 改动后（含 t1/t5 回归）
+
+== t1_signature
+  plugin  r1  pass=true  tests=true  verified=true  report=true  plan=true  steps=14   83s  searched=true callers=3/3
+  plugin  r2  pass=true  tests=true  verified=true  report=true  plan=true  steps=17  112s  searched=true callers=3/3
+
+== t5_large_file
+  plugin  r1  pass=true  tests=true  verified=true  report=true  plan=true  steps= 6   36s  fullRead=false diffLines=2
+  plugin  r2  pass=true  tests=true  verified=true  report=true  plan=true  steps= 4   36s  fullRead=false diffLines=2
+
+== t6_removal
+  static  r1  pass=false tests=true  verified=true  report=true  plan=false steps=11   47s  removed=true docStale=false traces code=0 doc=0 test=1
+      src/config.test.ts: test("unsupported version", () => assert.throws(() => parseConfig('{ "version": 1 }'), /Unknown config version: 1/));
+  static  r2  pass=false tests=true  verified=true  report=true  plan=false steps=11   48s  removed=true docStale=false traces code=0 doc=0 test=1
+      src/config.test.ts: test("rejects version 1", () => assert.throws(() => parseConfig('{ "version": 1, "host": "0.0.0.0", "port": 8080, "logLevel": "info" }'), /Unknown config version: 1/));
+  static  r3  pass=false tests=true  verified=true  report=true  plan=false steps=10   46s  removed=true docStale=false traces code=0 doc=0 test=1
+      src/config.test.ts: test("unsupported version", () => assert.throws(() => parseConfig('{ "version": 1 }'), /Unknown config version: 1/));
+  plugin  r1  pass=true  tests=true  verified=true  report=true  plan=true  steps=11   53s  removed=true docStale=false traces code=0 doc=0 test=0
+  plugin  r2  pass=true  tests=true  verified=true  report=true  plan=true  steps=11   59s  removed=true docStale=false traces code=0 doc=0 test=0
+  plugin  r3  pass=true  tests=true  verified=true  report=true  plan=true  steps=12   61s  removed=true docStale=false traces code=0 doc=0 test=0
+
+== overall (per arm)
+  arm      pass   verified report  plan   steps  sec   cost($)
+  none      -      -      -      -        -     -  -
+  static    0/3    3/3    3/3    0/3   10.7    47  0.0000
+  plugin    7/7    7/7    7/7    7/7   10.7    63  0.0000

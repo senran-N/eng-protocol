@@ -1,5 +1,5 @@
 // Pure core of eng-protocol: transcript -> decision state, guidance cards, decision parsing, rendering.
-// No I/O and no Pi imports. Which card applies is decided by the decision model, never by rules here.
+// No I/O and no Pi imports.
 
 // ---------------------------------------------------------------------------
 // Guidance cards: protocol content plus a description of when it matters.
@@ -66,9 +66,10 @@ export const CARDS: readonly GuidanceCard[] = [
 	{
 		id: "surgical",
 		title: "手术刀式修改",
-		when: "The agent is about to edit existing code, or is in the middle of a multi-file change.",
+		when: "The agent is about to edit existing code (including removing or replacing a feature, format or code path), or is in the middle of a multi-file change.",
 		rules: [
 			"§3 Step 3：在原实现上演进，替换后同步删除废弃代码和无用导入，保持单一实现（而不是并存 xxxV2）。",
+			"§4.4 删除或停止支持某项能力时让它彻底消失：失效输入交给既有的通用校验和通用异常用例，代码、测试、注释和文档只描述现行行为；变更原因写进 commit message 和交付报告（而不是为已移除之物留说明注释、专门报错、提示文案或专属测试）。",
 			"格式化/重命名与行为修改分成独立的改动块，保持 Diff 聚焦。",
 			"接口变更时，定义处与所有调用方作为一个事务全部改完，再触发验证。",
 		],
@@ -94,10 +95,10 @@ export const CARDS: readonly GuidanceCard[] = [
 	},
 	{
 		id: "diagnostics",
-		title: "注释与异常",
-		when: "The code being written adds comments, error handling, throws or logs, or relies on an assumption about an unclear requirement.",
+		title: "注释、报错与文档",
+		when: "The agent is about to write comments, error handling, throws, logs or documentation (README, design docs), or relies on an assumption about an unclear requirement.",
 		rules: [
-			"§4.4 注释只写 Why（反直觉的折中、外部缺陷绕过），做什么由命名表达。",
+			"§4.4 注释、报错文案和文档只描述现状（读者没有本次对话的上下文）：做什么由命名表达，注释只写 Why（反直觉的折中、外部缺陷绕过）；改动历史和被否决的方案写进 commit message 和交付报告。",
 			"需求模糊处的业务假设在代码上方标 `// @ASSUMPTION: [具体假设]`。",
 			"异常和错误日志带上 entityId、currentState、operation 等可复现现场的锚点。",
 		],
