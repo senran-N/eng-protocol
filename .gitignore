@@ -1,0 +1,4 @@
+eval/fixtures/
+eval/runs*/
+eval/long/runs/
+eval/long/*.log
