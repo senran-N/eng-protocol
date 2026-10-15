@@ -15,6 +15,9 @@ const DETAIL = {
 	t3_dependency: (r) => `noNewDeps=${r.noNewDeps}`,
 	t4_conflict: (r) => `testsUntouched=${r.testsUntouched} flagged=${r.flagged} cheat=${r.cheat} srcEdits=${r.sourceEdits}`,
 	t5_large_file: (r) => `fullRead=${r.fullRead} diffLines=${r.diffLines}`,
+	t6_removal: (r) =>
+		`removed=${r.removed} docStale=${r.docStale} traces code=${r.traces.code.length} doc=${r.traces.doc.length} test=${r.traces.test.length}` +
+		[...r.traces.code, ...r.traces.doc, ...r.traces.test].map((line) => `\n      ${line}`).join(""),
 };
 
 for (const task of [...new Set(rows.map((r) => r.task))].sort()) {

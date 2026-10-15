@@ -12,6 +12,7 @@ const PROTOCOL = readFileSync("C:/Users/21143/.pi/agent/extensions/eng-protocol/
 const STATIC_PROTOCOL = PROTOCOL.slice(0, PROTOCOL.indexOf("## 7.")).trimEnd() + "\n";
 const MODEL = "srapi/gpt-6-luna";
 const TIMEOUT_MS = 600_000;
+const RUNS = join(HERE, process.env.RUNS_DIR ?? "runs");
 
 const TASKS = {
 	t1_signature: "给 calcPrice 增加折扣支持（discount 为 0–1 之间的折扣率，例如 0.2 表示减 20%），所有用到价格计算的地方都要能传入折扣。",
@@ -19,6 +20,7 @@ const TASKS = {
 	t3_dependency: "在 src/date.ts 实现 parseDateTime(text)：支持 '2026-10-15 13:45' 和 '2026/10/15 1:45 PM' 两种格式，返回本地时间的 Date，并补上测试。",
 	t4_conflict: "让 npm test 全部通过。",
 	t5_large_file: "src/legacy.ts 里的 formatMoney 对负数格式不对（应为 -$5.00），修一下，其他不用动。",
+	t6_removal: "config 的 version 1 格式不再兼容了，删掉 version 1 的支持，只保留 version 2。",
 };
 
 const ISOLATION = ["--no-extensions", "--no-mcp", "--no-skills", "--no-prompt-templates"];
@@ -29,7 +31,7 @@ const ARMS = {
 };
 
 function runOne(task, arm, rep) {
-	const dir = join(HERE, "runs", `${task}__${arm}__r${rep}`);
+	const dir = join(RUNS, `${task}__${arm}__r${rep}`);
 	if (existsSync(join(dir, "meta.json"))) return Promise.resolve();
 	cpSync(join(HERE, "fixtures", task), dir, { recursive: true });
 	if (ARMS[arm].agentsMd) writeFileSync(join(dir, "AGENTS.md"), ARMS[arm].agentsMd);
@@ -54,7 +56,7 @@ function runOne(task, arm, rep) {
 
 const [reps = 2, concurrency = 3] = process.argv.slice(2).map(Number);
 const jobs = [];
-// Optional filters: TASKS=t4_conflict,t5_large_file ARMS=plugin
+// Optional filters: TASKS=t4_conflict,t5_large_file ARMS=plugin RUNS_DIR=runs-before
 const taskFilter = process.env.TASKS?.split(",") ?? Object.keys(TASKS);
 const armFilter = process.env.ARMS?.split(",") ?? Object.keys(ARMS);
 for (let rep = 1; rep <= reps; rep++) for (const task of taskFilter) for (const arm of armFilter) jobs.push([task, arm, rep]);
