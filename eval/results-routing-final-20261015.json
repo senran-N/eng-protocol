@@ -1,0 +1,590 @@
+{
+  "experiment": {
+    "model": "srapi/gpt-6-luna",
+    "thinking": "medium",
+    "node": "v24.14.0",
+    "commit": "c2258ac7b0eb82389132881bf2bcbb56eba28783",
+    "hashes": {
+      "protocol.md": "b1e8dd62c41dbcc1b3544f0b80eb2d748dc89011e08eaede31e3c36f8529ceb3",
+      "guidance.ts": "d8c809fdd3955e60109154b236af33c907d5ab307add89b1c53b2cf957117471",
+      "index.ts": "72799ce5d0cebb34c620daa5f8bf106ca2bef53720b8a9c68fe5e9dcd34ebdf4",
+      "decision.ts": "a27932f124fe4ed07e3e7c9b3cf316d2f2ddf3d1c2469c7244fae49fb4718799",
+      "eval/static.ts": "54c154ba430dd9e8cce9468a4ab98d45f097e70e24898cbf0a5571dd49a5d710",
+      "eval/checks.mjs": "6715b7841ac6de9caa2031f258810f64d9eec5098ed420c4bfbc7cf67019d862",
+      "eval/fixtures.mjs": "da6970e57f8e9fa4730fb19d140546d53b48d544298fcad9e227928523933b03",
+      "eval/run.mjs": "91813eb244d1a342eafa08e0c7ced1eeccde468ba2abcde376c9c693f1d172a6",
+      "eval/score.mjs": "9e90891cca1a2f5e79a9749121ab8b6e56135604ce4e6ffe05cea55aec948f73",
+      "eval/long/scenario.mjs": "ffe63e684ef6bf10e25bb58a80182ef8af7f5fd67fe54c800cda50057512417b",
+      "eval/long/run.mjs": "8d74b97eae1efc24007f088da0d59d873562eae7b2c242c80612c02d455f32a2",
+      "eval/long/score.mjs": "0e2c015989c7cf6cded34e777167e15b23955bbae2ccafea1fb9381575b6a502"
+    },
+    "config": {
+      "maxCards": 3,
+      "minProbability": 0.6,
+      "sendReasoning": true,
+      "enabled": true,
+      "decision": {
+        "endpoint": "https://api.subq.ai/v1/systemone",
+        "model": "subq-snap-preview",
+        "timeoutMs": 4000
+      }
+    }
+  },
+  "baselineRef": "HEAD",
+  "rows": [
+    {
+      "arm": "baseline",
+      "case": "question",
+      "pass": true,
+      "selected": [],
+      "scores": {
+        "context": 0.024272890761494637,
+        "topology": 0.014583566226065159,
+        "halt": 0.012251830659806728,
+        "scope": 0.025269566103816032,
+        "modeling": 0.01615259423851967,
+        "surgical": 0.011977949179708958,
+        "control_flow": 0.019526291638612747,
+        "cqs": 0.07525912672281265,
+        "diagnostics": 0.09152679890394211,
+        "systems": 0.04333823174238205,
+        "ui": 0.010658694431185722,
+        "no_cheat": 0.0142855579033494,
+        "verify": 0.018460260704159737,
+        "two_strike": 0.01070162933319807,
+        "delivery": 0.3324054181575775,
+        "candor": 0.02058212272822857
+      },
+      "latencyMs": 1080
+    },
+    {
+      "arm": "baseline",
+      "case": "authorized",
+      "pass": false,
+      "selected": [
+        "halt"
+      ],
+      "scores": {
+        "context": 0.11109673976898193,
+        "topology": 0.10498198866844177,
+        "halt": 0.9503278136253357,
+        "scope": 0.032515108585357666,
+        "modeling": 0.407390296459198,
+        "surgical": 0.10773102939128876,
+        "control_flow": 0.07294359803199768,
+        "cqs": 0.5303592681884766,
+        "diagnostics": 0.06714953482151031,
+        "systems": 0.07432796061038971,
+        "ui": 0.009647556580603123,
+        "no_cheat": 0.03239421546459198,
+        "verify": 0.13117147982120514,
+        "two_strike": 0.010388804599642754,
+        "delivery": 0.015550946816802025,
+        "candor": 0.07074902951717377
+      },
+      "latencyMs": 591
+    },
+    {
+      "arm": "baseline",
+      "case": "scope_drift",
+      "pass": true,
+      "selected": [
+        "scope",
+        "halt",
+        "context"
+      ],
+      "scores": {
+        "context": 0.7188205718994141,
+        "topology": 0.5096402168273926,
+        "halt": 0.916558563709259,
+        "scope": 0.9780763983726501,
+        "modeling": 0.06431910395622253,
+        "surgical": 0.2750226557254791,
+        "control_flow": 0.06308815628290176,
+        "cqs": 0.07323472201824188,
+        "diagnostics": 0.22917364537715912,
+        "systems": 0.05076098069548607,
+        "ui": 0.012036755681037903,
+        "no_cheat": 0.249790221452713,
+        "verify": 0.18468019366264343,
+        "two_strike": 0.019890207797288895,
+        "delivery": 0.02036459557712078,
+        "candor": 0.17909015715122223
+      },
+      "latencyMs": 519
+    },
+    {
+      "arm": "baseline",
+      "case": "user_correction",
+      "pass": false,
+      "selected": [
+        "scope"
+      ],
+      "scores": {
+        "context": 0.07090573757886887,
+        "topology": 0.01632378250360489,
+        "halt": 0.018943054601550102,
+        "scope": 0.6680822372436523,
+        "modeling": 0.022674424573779106,
+        "surgical": 0.02021198347210884,
+        "control_flow": 0.018598468974232674,
+        "cqs": 0.01827031560242176,
+        "diagnostics": 0.22583918273448944,
+        "systems": 0.018759679049253464,
+        "ui": 0.013957364484667778,
+        "no_cheat": 0.03012961335480213,
+        "verify": 0.037031419575214386,
+        "two_strike": 0.027573775500059128,
+        "delivery": 0.14250169694423676,
+        "candor": 0.029133668169379234
+      },
+      "latencyMs": 533
+    },
+    {
+      "arm": "baseline",
+      "case": "authorized_test_change",
+      "pass": false,
+      "selected": [
+        "surgical",
+        "control_flow",
+        "no_cheat"
+      ],
+      "scores": {
+        "context": 0.8792382478713989,
+        "topology": 0.8335220217704773,
+        "halt": 0.19547182321548462,
+        "scope": 0.028946727514266968,
+        "modeling": 0.06451831758022308,
+        "surgical": 0.9603338241577148,
+        "control_flow": 0.8990100622177124,
+        "cqs": 0.04348369315266609,
+        "diagnostics": 0.13785132765769958,
+        "systems": 0.01465790905058384,
+        "ui": 0.008468065410852432,
+        "no_cheat": 0.8972302675247192,
+        "verify": 0.5419837236404419,
+        "two_strike": 0.02454182505607605,
+        "delivery": 0.02249273471534252,
+        "candor": 0.023699002340435982
+      },
+      "latencyMs": 538
+    },
+    {
+      "arm": "baseline",
+      "case": "validated",
+      "pass": true,
+      "selected": [
+        "delivery"
+      ],
+      "scores": {
+        "context": 0.022249704226851463,
+        "topology": 0.025690237060189247,
+        "halt": 0.027821149677038193,
+        "scope": 0.02572358399629593,
+        "modeling": 0.02363225817680359,
+        "surgical": 0.024955403059720993,
+        "control_flow": 0.030959704890847206,
+        "cqs": 0.04345767945051193,
+        "diagnostics": 0.044479191303253174,
+        "systems": 0.014127029106020927,
+        "ui": 0.016241643577814102,
+        "no_cheat": 0.0226457417011261,
+        "verify": 0.03044789470732212,
+        "two_strike": 0.01789441891014576,
+        "delivery": 0.9718414545059204,
+        "candor": 0.019722742959856987
+      },
+      "latencyMs": 640
+    },
+    {
+      "arm": "baseline",
+      "case": "unverified",
+      "pass": true,
+      "selected": [
+        "verify",
+        "no_cheat",
+        "topology"
+      ],
+      "scores": {
+        "context": 0.12632955610752106,
+        "topology": 0.6553864479064941,
+        "halt": 0.02854560874402523,
+        "scope": 0.05270707234740257,
+        "modeling": 0.03497858718037605,
+        "surgical": 0.07814999669790268,
+        "control_flow": 0.05770915746688843,
+        "cqs": 0.0610802136361599,
+        "diagnostics": 0.0535832904279232,
+        "systems": 0.017078295350074768,
+        "ui": 0.010778932832181454,
+        "no_cheat": 0.9252509474754333,
+        "verify": 0.9713401198387146,
+        "two_strike": 0.019360361620783806,
+        "delivery": 0.3849942982196808,
+        "candor": 0.023142153397202492
+      },
+      "latencyMs": 532
+    },
+    {
+      "arm": "baseline",
+      "case": "weaken_test",
+      "pass": true,
+      "selected": [
+        "no_cheat",
+        "surgical",
+        "diagnostics"
+      ],
+      "scores": {
+        "context": 0.22351160645484924,
+        "topology": 0.402988076210022,
+        "halt": 0.10471276193857193,
+        "scope": 0.6136868000030518,
+        "modeling": 0.09203444421291351,
+        "surgical": 0.9019789695739746,
+        "control_flow": 0.22105316817760468,
+        "cqs": 0.06742425262928009,
+        "diagnostics": 0.641149640083313,
+        "systems": 0.013249839656054974,
+        "ui": 0.008954857476055622,
+        "no_cheat": 0.9768763184547424,
+        "verify": 0.44494181871414185,
+        "two_strike": 0.048410214483737946,
+        "delivery": 0.04851144924759865,
+        "candor": 0.07855875045061111
+      },
+      "latencyMs": 536
+    },
+    {
+      "arm": "baseline",
+      "case": "repeated_failure",
+      "pass": true,
+      "selected": [
+        "two_strike",
+        "no_cheat",
+        "surgical"
+      ],
+      "scores": {
+        "context": 0.21537621319293976,
+        "topology": 0.6442474126815796,
+        "halt": 0.015581358224153519,
+        "scope": 0.16715718805789948,
+        "modeling": 0.06275459378957748,
+        "surgical": 0.9281020760536194,
+        "control_flow": 0.4461692273616791,
+        "cqs": 0.10583019256591797,
+        "diagnostics": 0.35353848338127136,
+        "systems": 0.014811046421527863,
+        "ui": 0.010617530904710293,
+        "no_cheat": 0.9511496424674988,
+        "verify": 0.7229738235473633,
+        "two_strike": 0.9771924614906311,
+        "delivery": 0.01924140378832817,
+        "candor": 0.044855792075395584
+      },
+      "latencyMs": 502
+    },
+    {
+      "arm": "baseline",
+      "case": "callers",
+      "pass": true,
+      "selected": [
+        "topology",
+        "surgical",
+        "modeling"
+      ],
+      "scores": {
+        "context": 0.9108742475509644,
+        "topology": 0.9779858589172363,
+        "halt": 0.4318249821662903,
+        "scope": 0.4406323730945587,
+        "modeling": 0.9363728165626526,
+        "surgical": 0.945034921169281,
+        "control_flow": 0.05304180830717087,
+        "cqs": 0.3101530075073242,
+        "diagnostics": 0.3312118649482727,
+        "systems": 0.01678561419248581,
+        "ui": 0.008581290021538734,
+        "no_cheat": 0.38343364000320435,
+        "verify": 0.6430405974388123,
+        "two_strike": 0.018815267831087112,
+        "delivery": 0.02312297560274601,
+        "candor": 0.2160957008600235
+      },
+      "latencyMs": 484
+    },
+    {
+      "arm": "candidate",
+      "case": "question",
+      "pass": true,
+      "selected": [],
+      "scores": {
+        "context": 0.01655641384422779,
+        "topology": 0.013756480999290943,
+        "halt": 0.01650668866932392,
+        "scope": 0.03807356208562851,
+        "modeling": 0.013395281508564949,
+        "surgical": 0.017972134053707123,
+        "control_flow": 0.01372191309928894,
+        "cqs": 0.02009330689907074,
+        "diagnostics": 0.0195673406124115,
+        "systems": 0.019372442737221718,
+        "ui": 0.011807115748524666,
+        "no_cheat": 0.018503857776522636,
+        "verify": 0.02046871744096279,
+        "two_strike": 0.01999264396727085,
+        "delivery": 0.018369808793067932,
+        "candor": 0.021212592720985413
+      },
+      "latencyMs": 724
+    },
+    {
+      "arm": "candidate",
+      "case": "authorized",
+      "pass": true,
+      "selected": [],
+      "scores": {
+        "context": 0.17811696231365204,
+        "topology": 0.4220486581325531,
+        "halt": 0.024695370346307755,
+        "scope": 0.12524372339248657,
+        "modeling": 0.10195830464363098,
+        "surgical": 0.10375917702913284,
+        "control_flow": 0.04187516123056412,
+        "cqs": 0.054743144661188126,
+        "diagnostics": 0.11966659873723984,
+        "systems": 0.3786013424396515,
+        "ui": 0.029967479407787323,
+        "no_cheat": 0.12015490978956223,
+        "verify": 0.5402436256408691,
+        "two_strike": 0.12576329708099365,
+        "delivery": 0.14917372167110443,
+        "candor": 0.056802913546562195
+      },
+      "latencyMs": 741
+    },
+    {
+      "arm": "candidate",
+      "case": "scope_drift",
+      "pass": true,
+      "selected": [
+        "scope",
+        "halt",
+        "surgical"
+      ],
+      "scores": {
+        "context": 0.8391743302345276,
+        "topology": 0.29611289501190186,
+        "halt": 0.9583854675292969,
+        "scope": 0.9726493954658508,
+        "modeling": 0.037652045488357544,
+        "surgical": 0.8998658657073975,
+        "control_flow": 0.03300805762410164,
+        "cqs": 0.027744950726628304,
+        "diagnostics": 0.8306492567062378,
+        "systems": 0.14624470472335815,
+        "ui": 0.017957007512450218,
+        "no_cheat": 0.7077253460884094,
+        "verify": 0.29792913794517517,
+        "two_strike": 0.8815379738807678,
+        "delivery": 0.38236212730407715,
+        "candor": 0.46508851647377014
+      },
+      "latencyMs": 752
+    },
+    {
+      "arm": "candidate",
+      "case": "user_correction",
+      "pass": true,
+      "selected": [],
+      "scores": {
+        "context": 0.02872644178569317,
+        "topology": 0.020619260147213936,
+        "halt": 0.02290424145758152,
+        "scope": 0.24146458506584167,
+        "modeling": 0.01634409837424755,
+        "surgical": 0.020571189001202583,
+        "control_flow": 0.017586108297109604,
+        "cqs": 0.018883099779486656,
+        "diagnostics": 0.045398563146591187,
+        "systems": 0.0314004085958004,
+        "ui": 0.01392381638288498,
+        "no_cheat": 0.030412722378969193,
+        "verify": 0.021124739199876785,
+        "two_strike": 0.0460619293153286,
+        "delivery": 0.04247785359621048,
+        "candor": 0.12221278250217438
+      },
+      "latencyMs": 720
+    },
+    {
+      "arm": "candidate",
+      "case": "authorized_test_change",
+      "pass": true,
+      "selected": [
+        "surgical",
+        "topology",
+        "verify"
+      ],
+      "scores": {
+        "context": 0.4072323143482208,
+        "topology": 0.8789952993392944,
+        "halt": 0.07326087355613708,
+        "scope": 0.3655219078063965,
+        "modeling": 0.06797447055578232,
+        "surgical": 0.9168546199798584,
+        "control_flow": 0.032575976103544235,
+        "cqs": 0.021417763084173203,
+        "diagnostics": 0.7056246399879456,
+        "systems": 0.08800525218248367,
+        "ui": 0.026814626529812813,
+        "no_cheat": 0.17610177397727966,
+        "verify": 0.8625890612602234,
+        "two_strike": 0.29699063301086426,
+        "delivery": 0.32054850459098816,
+        "candor": 0.062479522079229355
+      },
+      "latencyMs": 729
+    },
+    {
+      "arm": "candidate",
+      "case": "validated",
+      "pass": true,
+      "selected": [],
+      "scores": {
+        "context": 0.04587898403406143,
+        "topology": 0.04572942852973938,
+        "halt": 0.0345723032951355,
+        "scope": 0.05516229197382927,
+        "modeling": 0.026116730645298958,
+        "surgical": 0.0483110249042511,
+        "control_flow": 0.026123961433768272,
+        "cqs": 0.018744289875030518,
+        "diagnostics": 0.0923735573887825,
+        "systems": 0.04981965571641922,
+        "ui": 0.015017314814031124,
+        "no_cheat": 0.03975732624530792,
+        "verify": 0.04749377816915512,
+        "two_strike": 0.037367310374975204,
+        "delivery": 0.3818609118461609,
+        "candor": 0.07377051562070847
+      },
+      "latencyMs": 749
+    },
+    {
+      "arm": "candidate",
+      "case": "unverified",
+      "pass": true,
+      "selected": [
+        "verify",
+        "delivery",
+        "context"
+      ],
+      "scores": {
+        "context": 0.9683284163475037,
+        "topology": 0.8885319828987122,
+        "halt": 0.09266284108161926,
+        "scope": 0.8534444570541382,
+        "modeling": 0.11583701521158218,
+        "surgical": 0.6411758065223694,
+        "control_flow": 0.0412239171564579,
+        "cqs": 0.03977841138839722,
+        "diagnostics": 0.8795450329780579,
+        "systems": 0.8182572722434998,
+        "ui": 0.028365163132548332,
+        "no_cheat": 0.9133935570716858,
+        "verify": 0.9798246622085571,
+        "two_strike": 0.9281731247901917,
+        "delivery": 0.9743928909301758,
+        "candor": 0.9181634187698364
+      },
+      "latencyMs": 731
+    },
+    {
+      "arm": "candidate",
+      "case": "weaken_test",
+      "pass": true,
+      "selected": [
+        "no_cheat",
+        "scope",
+        "context"
+      ],
+      "scores": {
+        "context": 0.9375652074813843,
+        "topology": 0.6680919528007507,
+        "halt": 0.8736966848373413,
+        "scope": 0.9550631642341614,
+        "modeling": 0.0669138953089714,
+        "surgical": 0.5637743473052979,
+        "control_flow": 0.028229253366589546,
+        "cqs": 0.0316433347761631,
+        "diagnostics": 0.898685097694397,
+        "systems": 0.14413237571716309,
+        "ui": 0.019919639453291893,
+        "no_cheat": 0.9759821891784668,
+        "verify": 0.8669553399085999,
+        "two_strike": 0.8089893460273743,
+        "delivery": 0.8627990484237671,
+        "candor": 0.9143539071083069
+      },
+      "latencyMs": 742
+    },
+    {
+      "arm": "candidate",
+      "case": "repeated_failure",
+      "pass": true,
+      "selected": [
+        "two_strike",
+        "context",
+        "candor"
+      ],
+      "scores": {
+        "context": 0.8868923187255859,
+        "topology": 0.660050630569458,
+        "halt": 0.03623547405004501,
+        "scope": 0.5062583684921265,
+        "modeling": 0.07874955981969833,
+        "surgical": 0.18588267266750336,
+        "control_flow": 0.048680637031793594,
+        "cqs": 0.02628406137228012,
+        "diagnostics": 0.626488208770752,
+        "systems": 0.10294875502586365,
+        "ui": 0.01882881112396717,
+        "no_cheat": 0.4837319850921631,
+        "verify": 0.8737114667892456,
+        "two_strike": 0.9733673334121704,
+        "delivery": 0.8119704723358154,
+        "candor": 0.8832185864448547
+      },
+      "latencyMs": 746
+    },
+    {
+      "arm": "candidate",
+      "case": "callers",
+      "pass": true,
+      "selected": [
+        "topology",
+        "context",
+        "surgical"
+      ],
+      "scores": {
+        "context": 0.9540141224861145,
+        "topology": 0.973783552646637,
+        "halt": 0.778742790222168,
+        "scope": 0.9224091172218323,
+        "modeling": 0.2561092674732208,
+        "surgical": 0.9527052640914917,
+        "control_flow": 0.030521657317876816,
+        "cqs": 0.02972085401415825,
+        "diagnostics": 0.8628883361816406,
+        "systems": 0.7688153982162476,
+        "ui": 0.021533580496907234,
+        "no_cheat": 0.9406099915504456,
+        "verify": 0.9386381506919861,
+        "two_strike": 0.9204502701759338,
+        "delivery": 0.7079088091850281,
+        "candor": 0.6667042970657349
+      },
+      "latencyMs": 723
+    }
+  ]
+}

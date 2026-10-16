@@ -1,0 +1,148 @@
+[
+  {
+    "arm": "static",
+    "rep": 1,
+    "turns": [
+      {
+        "n": 1,
+        "id": "f1_inventory",
+        "outcome": "settled",
+        "sec": 38,
+        "testsPass": true,
+        "acceptancePass": true,
+        "guidanceLines": 0
+      },
+      {
+        "n": 2,
+        "id": "f2_cancel",
+        "outcome": "settled",
+        "sec": 39,
+        "testsPass": true,
+        "acceptancePass": true,
+        "guidanceLines": 0
+      },
+      {
+        "n": 3,
+        "id": "f3_report",
+        "outcome": "settled",
+        "sec": 35,
+        "testsPass": true,
+        "acceptancePass": true,
+        "guidanceLines": 0
+      },
+      {
+        "n": 4,
+        "id": "f4_coupon",
+        "outcome": "settled",
+        "sec": 26,
+        "testsPass": true,
+        "acceptancePass": true,
+        "guidanceLines": 0
+      }
+    ],
+    "experiment": {
+      "model": "srapi/gpt-6-luna",
+      "thinking": "medium",
+      "node": "v24.14.0",
+      "commit": "c2258ac7b0eb82389132881bf2bcbb56eba28783",
+      "hashes": {
+        "protocol.md": "a7b148991982e35f09225a5ec2b0fdce466c892c34332ba18979399bebd5e783",
+        "guidance.ts": "d8c809fdd3955e60109154b236af33c907d5ab307add89b1c53b2cf957117471",
+        "index.ts": "72799ce5d0cebb34c620daa5f8bf106ca2bef53720b8a9c68fe5e9dcd34ebdf4",
+        "decision.ts": "a27932f124fe4ed07e3e7c9b3cf316d2f2ddf3d1c2469c7244fae49fb4718799",
+        "eval/static.ts": "54c154ba430dd9e8cce9468a4ab98d45f097e70e24898cbf0a5571dd49a5d710",
+        "eval/checks.mjs": "6715b7841ac6de9caa2031f258810f64d9eec5098ed420c4bfbc7cf67019d862",
+        "eval/fixtures.mjs": "da6970e57f8e9fa4730fb19d140546d53b48d544298fcad9e227928523933b03",
+        "eval/run.mjs": "91813eb244d1a342eafa08e0c7ced1eeccde468ba2abcde376c9c693f1d172a6",
+        "eval/score.mjs": "9e90891cca1a2f5e79a9749121ab8b6e56135604ce4e6ffe05cea55aec948f73",
+        "eval/long/scenario.mjs": "ffe63e684ef6bf10e25bb58a80182ef8af7f5fd67fe54c800cda50057512417b",
+        "eval/long/run.mjs": "8d74b97eae1efc24007f088da0d59d873562eae7b2c242c80612c02d455f32a2",
+        "eval/long/score.mjs": "0e2c015989c7cf6cded34e777167e15b23955bbae2ccafea1fb9381575b6a502"
+      },
+      "config": {
+        "maxCards": 3,
+        "minProbability": 0.6,
+        "sendReasoning": true,
+        "enabled": true,
+        "decision": {
+          "endpoint": "https://api.subq.ai/v1/systemone",
+          "model": "subq-snap-preview",
+          "timeoutMs": 4000
+        }
+      }
+    }
+  },
+  {
+    "arm": "plugin",
+    "rep": 1,
+    "turns": [
+      {
+        "n": 1,
+        "id": "f1_inventory",
+        "outcome": "settled",
+        "sec": 53,
+        "testsPass": true,
+        "acceptancePass": true,
+        "guidanceLines": 6
+      },
+      {
+        "n": 2,
+        "id": "f2_cancel",
+        "outcome": "settled",
+        "sec": 41,
+        "testsPass": true,
+        "acceptancePass": true,
+        "guidanceLines": 12
+      },
+      {
+        "n": 3,
+        "id": "f3_report",
+        "outcome": "settled",
+        "sec": 43,
+        "testsPass": true,
+        "acceptancePass": true,
+        "guidanceLines": 19
+      },
+      {
+        "n": 4,
+        "id": "f4_coupon",
+        "outcome": "settled",
+        "sec": 31,
+        "testsPass": true,
+        "acceptancePass": true,
+        "guidanceLines": 24
+      }
+    ],
+    "experiment": {
+      "model": "srapi/gpt-6-luna",
+      "thinking": "medium",
+      "node": "v24.14.0",
+      "commit": "c2258ac7b0eb82389132881bf2bcbb56eba28783",
+      "hashes": {
+        "protocol.md": "a7b148991982e35f09225a5ec2b0fdce466c892c34332ba18979399bebd5e783",
+        "guidance.ts": "d8c809fdd3955e60109154b236af33c907d5ab307add89b1c53b2cf957117471",
+        "index.ts": "72799ce5d0cebb34c620daa5f8bf106ca2bef53720b8a9c68fe5e9dcd34ebdf4",
+        "decision.ts": "a27932f124fe4ed07e3e7c9b3cf316d2f2ddf3d1c2469c7244fae49fb4718799",
+        "eval/static.ts": "54c154ba430dd9e8cce9468a4ab98d45f097e70e24898cbf0a5571dd49a5d710",
+        "eval/checks.mjs": "6715b7841ac6de9caa2031f258810f64d9eec5098ed420c4bfbc7cf67019d862",
+        "eval/fixtures.mjs": "da6970e57f8e9fa4730fb19d140546d53b48d544298fcad9e227928523933b03",
+        "eval/run.mjs": "91813eb244d1a342eafa08e0c7ced1eeccde468ba2abcde376c9c693f1d172a6",
+        "eval/score.mjs": "9e90891cca1a2f5e79a9749121ab8b6e56135604ce4e6ffe05cea55aec948f73",
+        "eval/long/scenario.mjs": "ffe63e684ef6bf10e25bb58a80182ef8af7f5fd67fe54c800cda50057512417b",
+        "eval/long/run.mjs": "8d74b97eae1efc24007f088da0d59d873562eae7b2c242c80612c02d455f32a2",
+        "eval/long/score.mjs": "0e2c015989c7cf6cded34e777167e15b23955bbae2ccafea1fb9381575b6a502"
+      },
+      "config": {
+        "maxCards": 3,
+        "minProbability": 0.6,
+        "sendReasoning": true,
+        "enabled": true,
+        "decision": {
+          "endpoint": "https://api.subq.ai/v1/systemone",
+          "model": "subq-snap-preview",
+          "timeoutMs": 4000
+        }
+      }
+    }
+  }
+]

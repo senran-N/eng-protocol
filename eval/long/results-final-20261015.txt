@@ -1,0 +1,28 @@
+
+== plugin r1
+  turn               pass verif acpt plan steps  sec  detail
+   1 f1_inventory      ✓    ✓    ✓    ✓     7   53
+   2 f2_cancel         ✓    ✓    ✓    ✓     9   41
+   3 f3_report         ✓    ✓    ✓    ✓     9   43
+   4 f4_coupon         ✓    ✓    ✓    ✓     6   31
+
+== static r1
+  turn               pass verif acpt plan steps  sec  detail
+   1 f1_inventory      ✓    ✓    ✓    ✓     8   38
+   2 f2_cancel         ✓    ✓    ✓    ✓     6   39
+   3 f3_report         ✓    ✓    ✓    ✓     7   35
+   4 f4_coupon         ✓    ✓    ✓    ✓     5   26
+
+== drift: early turns (1–4) vs late turns (5–9)
+  arm     phase  pass    verified accept  plan    sec/turn
+  static  early  4/4     4/4      4/4     4/4     35
+  static  late   -       -        -       -       -
+  plugin  early  4/4     4/4      4/4     4/4     42
+  plugin  late   -       -        -       -       -
+
+== traps (turns 5–9) per arm
+  t5_signature          -       -
+  t6_large_file         -       -
+  t7_dependency         -       -
+  t8_no_cheat           -       -
+  t9_conflict           -       -
