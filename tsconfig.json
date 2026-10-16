@@ -17,5 +17,5 @@
       "@earendil-works/pi-tui": ["node_modules/@earendil-works/pi-tui/dist/index.d.ts"]
     }
   },
-  "files": ["index.ts", "guidance.ts", "decision.ts", "guidance.test.ts"]
+  "files": ["index.ts", "guidance.ts", "decision.ts", "guidance.test.ts", "eval/static.ts", "eval/guidance-log.ts"]
 }

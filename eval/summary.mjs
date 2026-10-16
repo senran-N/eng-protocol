@@ -7,17 +7,15 @@ const rate = (list, key) => {
 	const known = list.filter((r) => r[key] !== null && r[key] !== undefined);
 	return known.length === 0 ? "  -  " : `${known.filter((r) => r[key] === true).length}/${known.length}`.padStart(5);
 };
-const mean = (list, key, digits = 0) => (list.length === 0 ? "-" : (list.reduce((s, r) => s + r[key], 0) / list.length).toFixed(digits));
+const mean = (list, key, digits = 0) => (list.length === 0 || list.some((r) => typeof r[key] !== "number") ? "unknown" : (list.reduce((s, r) => s + r[key], 0) / list.length).toFixed(digits));
 
 const DETAIL = {
 	t1_signature: (r) => `searched=${r.searched} callers=${r.callers}/3`,
 	t2_no_cheat: (r) => `testUntouched=${r.testUntouched}`,
 	t3_dependency: (r) => `noNewDeps=${r.noNewDeps}`,
-	t4_conflict: (r) => `testsUntouched=${r.testsUntouched} flagged=${r.flagged} cheat=${r.cheat} srcEdits=${r.sourceEdits}`,
+	t4_conflict: (r) => `testsUntouched=${r.testsUntouched} flagged=${r.flagged} cheat=${r.cheat} srcEdits=${r.sourceEdits}; explanation requires review`,
 	t5_large_file: (r) => `fullRead=${r.fullRead} diffLines=${r.diffLines}`,
-	t6_removal: (r) =>
-		`removed=${r.removed} docStale=${r.docStale} traces code=${r.traces.code.length} doc=${r.traces.doc.length} test=${r.traces.test.length}` +
-		[...r.traces.code, ...r.traces.doc, ...r.traces.test].map((line) => `\n      ${line}`).join(""),
+	t6_removal: (r) => `removed=${r.removed} docReview=${r.docStale}`,
 };
 
 for (const task of [...new Set(rows.map((r) => r.task))].sort()) {
@@ -25,15 +23,15 @@ for (const task of [...new Set(rows.map((r) => r.task))].sort()) {
 	for (const arm of ARMS) {
 		for (const r of rows.filter((x) => x.task === task && x.arm === arm).sort((a, b) => a.rep - b.rep)) {
 			console.log(
-				`  ${arm.padEnd(7)} r${r.rep}  pass=${String(r.pass).padEnd(5)} tests=${String(r.testsPass).padEnd(5)} verified=${String(r.verified).padEnd(5)} report=${String(r.report).padEnd(5)} plan=${String(r.plan).padEnd(5)} steps=${String(r.steps).padStart(2)} ${String(r.sec).padStart(4)}s  ${DETAIL[task](r)}`,
+				`  ${arm.padEnd(7)} r${r.rep}  pass=${String(r.pass).padEnd(5)} acceptance=${String(r.acceptancePass).padEnd(5)} tests=${String(r.testsPass).padEnd(5)} verified=${String(r.verified).padEnd(5)} plan=${String(r.plan).padEnd(5)} steps=${String(r.steps).padStart(2)} ${String(r.sec).padStart(4)}s  ${DETAIL[task](r)}`,
 			);
 		}
 	}
 }
 
 console.log("\n== overall (per arm)");
-console.log("  arm      pass   verified report  plan   steps  sec   cost($)");
+console.log("  arm      pass   verified plan   steps  sec   outputTokens modelCost($); decision cost unknown");
 for (const arm of ARMS) {
 	const list = rows.filter((r) => r.arm === arm);
-	console.log(`  ${arm.padEnd(7)} ${rate(list, "pass")}  ${rate(list, "verified")}  ${rate(list, "report")}  ${rate(list, "plan")}  ${mean(list, "steps", 1).padStart(5)}  ${mean(list, "sec").padStart(4)}  ${mean(list, "cost", 4)}`);
+	console.log(`  ${arm.padEnd(7)} ${rate(list, "pass")}  ${rate(list, "verified")}  ${rate(list, "plan")}  ${mean(list, "steps", 1).padStart(5)}  ${mean(list, "sec").padStart(4)}  ${mean(list, "outputTokens")} ${mean(list, "modelCost", 4)}`);
 }

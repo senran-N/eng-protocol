@@ -34,11 +34,11 @@ export const FIXTURE = {
 };
 
 export const TURNS = [
-	{ id: "f1_inventory", prompt: "给 src/inventory.ts 的 Inventory 增加库存预留：reserve(sku, qty) 和 release(sku, qty)，库存不足时要报错，并补测试。" },
+	{ id: "f1_inventory", prompt: "给 src/inventory.ts 的 Inventory 增加库存预留：reserve(sku, qty) 和 release(sku, qty)。available 返回可用库存，预留扣除可用数、释放恢复可用数，库存不足时要报错，并补测试。" },
 	{ id: "f2_cancel", prompt: "在 src/orders.ts 增加 cancelOrder(order, inventory)：把订单状态改为 cancelled，并释放这个订单占用的库存。补测试。" },
-	{ id: "f3_report", prompt: "src/report.ts 增加 salesBySku(orders)：按 sku 汇总已完成订单的数量和金额。补测试。" },
-	{ id: "f4_coupon", prompt: "购物车要支持优惠券：固定金额减免，减免后总价不能低于 0。补测试。" },
-	{ id: "t5_signature", prompt: "calcPrice 需要支持折扣率参数（0–1，例如 0.2 表示减 20%），所有用到价格计算的地方都要能传入折扣。" },
+	{ id: "f3_report", prompt: "src/report.ts 增加 salesBySku(orders)：按 sku 汇总已完成订单的数量和金额，返回 Record<string, {qty: number, amount: number}>。补测试。" },
+	{ id: "f4_coupon", prompt: "购物车 cartTotal(items, coupon = 0) 要支持优惠券：coupon 为固定减免金额，减免后总价不能低于 0。补测试。" },
+	{ id: "t5_signature", prompt: "calcPrice(qty, unitPrice, discount = 0) 需要支持折扣率（0–1）。cart/invoice/report/orders 的输入行增加可选 discount 并传给 calcPrice，原输出格式不变。补测试。" },
 	{
 		id: "t6_large_file",
 		setup: { "src/legacy.test.ts": `${TEST_HEADER}import { formatMoney } from "./legacy.ts";\n\ntest("positive", () => assert.equal(formatMoney(5), "$5.00"));\ntest("negative", () => assert.equal(formatMoney(-5), "-$5.00"));\n` },

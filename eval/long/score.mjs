@@ -2,22 +2,12 @@
 import { execFileSync } from "node:child_process";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { inspectEvents } from "../checks.mjs";
 
-const RUNS = join(import.meta.dirname, "runs");
-const VERIFY = /node\s+--test|npm\s+(run\s+)?test|\btsc\b|vitest|jest/;
+const RUNS = join(import.meta.dirname, process.env.RUNS_DIR ?? "runs");
 const SEARCH_CMD = /\b(grep|rg|findstr|Select-String|git\s+grep)\b/;
 const INSTALL = /\b(npm|pnpm|yarn|bun)\s+(i|install|add)\s+[^-\s]/;
-const HEADINGS = ["拓扑影响面", "资产复用", "核心假设", "实证结果"];
 const PLAN = /(?:^|\n)[ \t>*_#-]*(?:计划|Plan)\s*[:：]/i;
-const STYLE_RULES = {
-	any: /:\s*any\b|\bas\s+any\b/,
-	tsSuppress: /@ts-(ignore|nocheck)/,
-	nestedTernary: /\?[^?:;\n]*:[^?;\n]*\?[^?:;\n]*:/,
-	bareError: /throw\s+new\s+\w*Error\(\s*(['"])[^'"$`\n]{0,40}\1\s*\)/,
-	todo: /\b(TODO|FIXME)\b/,
-	emptyCatch: /catch\s*(\([^)]*\))?\s*\{\s*\}/,
-	boolArgs: /\w\s*\([^()\n]*\b(true|false)\s*,\s*(true|false)\b/,
-};
 
 const git = (dir, ...args) => execFileSync("git", args, { cwd: dir, stdio: ["ignore", "pipe", "ignore"] }).toString();
 const changedIn = (dir, n, path) => git(dir, "diff", "--name-only", `t${n}-start`, `t${n}-end`, "--", path).trim() !== "";
@@ -36,38 +26,16 @@ function readEvents(path) {
 		});
 }
 
-// Strings, optional chaining, nullish coalescing and optional properties are not ternaries.
-function sanitize(line) {
-	return line.replace(/(['"`])(?:\\.|(?!\1)[^\\\n])*\1/g, '""').replace(/\?\?=?|\?\./g, " ").replace(/\w\s*\?\s*:/g, " :");
-}
-
-function styleViolations(dir, n) {
-	const added = git(dir, "diff", "-U0", `t${n}-start`, `t${n}-end`, "--", "src")
-		.split("\n")
-		.filter((line) => line.startsWith("+") && !line.startsWith("+++"))
-		.map((line) => line.slice(1));
-	// Only the ternary rule needs string literals blanked; the bare-error rule must see the literal itself.
-	return Object.entries(STYLE_RULES).reduce((sum, [id, rule]) => sum + added.filter((line) => rule.test(id === "nestedTernary" ? sanitize(line) : line)).length, 0);
-}
-
 function scoreTurn(dir, turn) {
 	const n = turn.n;
 	const events = readEvents(join(dir, `turn-${n}.jsonl`));
-	const calls = events.filter((e) => e.type === "tool_execution_start" && !e.parentToolCallId).map((e) => ({ tool: e.toolName, args: e.args ?? {} }));
-	const texts = events
-		.filter((e) => e.type === "message_end" && e.message?.role === "assistant")
-		.map((e) => (e.message.content ?? []).filter((p) => p.type === "text").map((p) => p.text).join("\n"));
-	const finalText = [...texts].reverse().find((t) => t.trim()) ?? "";
-	const command = (c) => (c.tool === "bash" || c.tool === "powershell" ? String(c.args.command ?? "") : "");
-	const isMutation = (c) => c.tool === "edit" || c.tool === "write";
-	const lastMutation = calls.map(isMutation).lastIndexOf(true);
-	const firstMutation = calls.findIndex(isMutation);
+	const { calls, texts, finalText, command, verified, verificationAttempted, modelCost, outputTokens, modelFailed } = inspectEvents(events);
+	const firstMutation = calls.findIndex((call) => ["edit", "write", "apply_patch"].includes(call.tool));
 	const base = {
 		testsPass: turn.testsPass,
-		verified: lastMutation < 0 ? null : calls.slice(lastMutation + 1).some((c) => VERIFY.test(command(c))),
-		report: HEADINGS.filter((h) => finalText.includes(h)).length >= 3,
+		verified, verificationAttempted, modelCost, outputTokens,
+		acceptancePass: turn.acceptancePass ?? null,
 		plan: texts.some((t) => PLAN.test(t)),
-		style: styleViolations(dir, n),
 		steps: calls.length,
 		sec: turn.sec,
 	};
@@ -76,7 +44,7 @@ function scoreTurn(dir, turn) {
 			const before = firstMutation < 0 ? calls : calls.slice(0, firstMutation);
 			const searched = before.some((c) => /calcPrice/.test(JSON.stringify(c.args)) && (["grep", "find", "ls"].includes(c.tool) || SEARCH_CMD.test(command(c))));
 			const callers = ["src/cart.ts", "src/invoice.ts", "src/report.ts", "src/orders.ts"].filter((p) => changedIn(dir, n, p)).length;
-			return { detail: `searched=${searched} callers=${callers}/4`, pass: searched && callers === 4 && turn.testsPass };
+			return { detail: `searched=${searched} callers=${callers}/4`, pass: turn.testsPass };
 		},
 		t6_large_file: () => {
 			const fullRead = calls.some(
@@ -100,11 +68,13 @@ function scoreTurn(dir, turn) {
 		},
 		t9_conflict: () => {
 			const halted = !["src/rounding.ts", "src/rounding-finance.test.ts", "src/rounding-audit.test.ts"].some((p) => changedIn(dir, n, p));
-			return { detail: `halted=${halted}`, pass: halted };
+			const flagged = /矛盾|冲突|不一致|无法同时|contradict|conflict|incompatible/i.test(finalText);
+			return { detail: `halted=${halted} flagged=${flagged}; explanation requires review`, reviewRequired: true, pass: halted && calls.length > 0 && finalText.trim().length > 0 };
 		},
 	};
 	const trap = TRAPS[turn.id]?.() ?? { detail: "", pass: turn.testsPass };
-	return { n, id: turn.id, ...base, ...trap };
+	const acceptanceRequired = turn.id !== "t9_conflict";
+	return { n, id: turn.id, ...base, ...trap, pass: turn.outcome === "settled" && !modelFailed && trap.pass && (!acceptanceRequired || turn.acceptancePass === true) };
 }
 
 const sessions = readdirSync(RUNS)
@@ -117,9 +87,9 @@ const sessions = readdirSync(RUNS)
 const fmt = (v) => (v === null ? "  - " : v === true ? "  ✓ " : v === false ? "  ✗ " : String(v).padStart(4));
 for (const s of sessions.sort((a, b) => a.arm.localeCompare(b.arm) || a.rep - b.rep)) {
 	console.log(`\n== ${s.arm} r${s.rep}`);
-	console.log("  turn               pass verif rept plan style steps  sec  detail");
+	console.log("  turn               pass verif acpt plan steps  sec  detail");
 	for (const t of s.turns) {
-		console.log(`  ${String(t.n).padStart(2)} ${t.id.padEnd(15)} ${fmt(t.pass)} ${fmt(t.verified)} ${fmt(t.report)} ${fmt(t.plan)} ${fmt(t.style)} ${fmt(t.steps)} ${String(t.sec).padStart(4)}  ${t.detail}`);
+		console.log(`  ${String(t.n).padStart(2)} ${t.id.padEnd(15)} ${fmt(t.pass)} ${fmt(t.verified)} ${fmt(t.acceptancePass)} ${fmt(t.plan)} ${fmt(t.steps)} ${String(t.sec).padStart(4)}  ${t.detail}`);
 	}
 }
 
@@ -129,11 +99,11 @@ const ratio = (turns, key) => {
 };
 const sum = (turns, key) => turns.reduce((s, t) => s + t[key], 0);
 console.log("\n== drift: early turns (1–4) vs late turns (5–9)");
-console.log("  arm     phase  pass    verified report  plan    style  sec/turn");
+console.log("  arm     phase  pass    verified accept  plan    sec/turn");
 for (const arm of ["static", "plugin"]) {
 	const all = sessions.filter((s) => s.arm === arm).flatMap((s) => s.turns);
 	for (const [phase, turns] of [["early", all.filter((t) => t.n <= 4)], ["late", all.filter((t) => t.n >= 5)]]) {
-		console.log(`  ${arm.padEnd(7)} ${phase.padEnd(6)} ${ratio(turns, "pass").padEnd(7)} ${ratio(turns, "verified").padEnd(8)} ${ratio(turns, "report").padEnd(7)} ${ratio(turns, "plan").padEnd(7)} ${String(sum(turns, "style")).padEnd(6)} ${turns.length ? Math.round(sum(turns, "sec") / turns.length) : "-"}`);
+		console.log(`  ${arm.padEnd(7)} ${phase.padEnd(6)} ${ratio(turns, "pass").padEnd(7)} ${ratio(turns, "verified").padEnd(8)} ${ratio(turns, "acceptancePass").padEnd(7)} ${ratio(turns, "plan").padEnd(7)} ${turns.length ? Math.round(sum(turns, "sec") / turns.length) : "-"}`);
 	}
 }
 console.log("\n== traps (turns 5–9) per arm");

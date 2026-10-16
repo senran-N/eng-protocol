@@ -1,24 +1,16 @@
 // Drives one Pi RPC session per (arm, rep) through every turn of scenario.mjs.
 // Usage: node run.mjs <reps> <concurrency>      (optional env ARMS=static,plugin)
 import { execFileSync, spawn, spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { createInterface } from "node:readline";
 import { FIXTURE, TURNS } from "./scenario.mjs";
+import { ARMS, CLI, MODEL, experimentMetadata } from "../experiment.mjs";
+import { checkAcceptance } from "../checks.mjs";
 
 const HERE = import.meta.dirname;
-const CLI = "C:/Users/21143/AppData/Roaming/npm/node_modules/@earendil-works/pi-coding-agent/dist/bundle/cli.js";
-const PLUGIN_DIR = join(HERE, "..", "..");
-const PROTOCOL = readFileSync(join(PLUGIN_DIR, "protocol.md"), "utf8");
-const STATIC_PROTOCOL = PROTOCOL.slice(0, PROTOCOL.indexOf("## 7.")).trimEnd() + "\n";
-const MODEL = "srapi/gpt-6-luna";
 const TURN_TIMEOUT_MS = 15 * 60_000;
-
-const ISOLATION = ["--no-extensions", "--no-mcp", "--no-skills", "--no-prompt-templates"];
-const ARMS = {
-	static: { args: ISOLATION, agentsMd: STATIC_PROTOCOL },
-	plugin: { args: [...ISOLATION, "--no-context-files", "--extension", join(PLUGIN_DIR, "index.ts"), "--extension", join(HERE, "..", "guidance-log.ts")], agentsMd: undefined },
-};
+const experiment = experimentMetadata();
 
 function writeFiles(dir, files) {
 	for (const [path, content] of Object.entries(files)) {
@@ -39,18 +31,25 @@ function countLines(path) {
 }
 
 async function runSession(arm, rep) {
-	const dir = join(HERE, "runs", `${arm}__r${rep}`);
-	if (existsSync(join(dir, "meta.json"))) return;
-	rmSync(dir, { recursive: true, force: true });
-	writeFiles(dir, { ...FIXTURE, ...(ARMS[arm].agentsMd ? { "AGENTS.md": ARMS[arm].agentsMd } : {}) });
+	const dir = join(HERE, process.env.RUNS_DIR ?? "runs", `${arm}__r${rep}`);
+	if (existsSync(dir)) throw new Error(`Use a fresh RUNS_DIR; refusing to mix experiments in ${dir}`);
+	writeFiles(dir, { ...FIXTURE, ".pi/eng-protocol.json": JSON.stringify({ enabled: true }) });
 	execFileSync("git", ["init", "-q"], { cwd: dir });
 	snapshot(dir, "fixture");
 
-	const args = [CLI, "--mode", "rpc", "--no-session", "--model", MODEL, "--thinking", "medium", ...ARMS[arm].args];
-	const child = spawn(process.execPath, args, { cwd: dir, stdio: ["pipe", "pipe", "pipe"], windowsHide: true });
+	const args = [CLI, "--mode", "rpc", "--no-session", "--model", MODEL, "--thinking", "medium", ...ARMS[arm]];
+	const logDirectory = join(HERE, process.env.RUNS_DIR ?? "runs", "logs");
+	mkdirSync(logDirectory, { recursive: true });
+	const guidancePath = join(logDirectory, `${arm}__r${rep}.jsonl`);
+	const child = spawn(process.execPath, args, { cwd: dir, env: { ...process.env, ENG_PROTOCOL_GUIDANCE_LOG: guidancePath }, stdio: ["pipe", "pipe", "pipe"], windowsHide: true });
 	child.stderr.on("data", (chunk) => writeFileSync(join(dir, "stderr.log"), chunk, { flag: "a" }));
 	const lines = createInterface({ input: child.stdout });
 	let onLine = () => {};
+	let onStopped = () => {};
+	const stopped = new Promise((resolve) => {
+		child.once("error", () => { onStopped(); resolve(); });
+		child.once("close", () => { onStopped(); resolve(); });
+	});
 	lines.on("line", (line) => onLine(line));
 
 	const turns = [];
@@ -63,6 +62,7 @@ async function runSession(arm, rep) {
 		const startedAt = Date.now();
 		const outcome = await new Promise((resolve) => {
 			const timer = setTimeout(() => resolve("timeout"), TURN_TIMEOUT_MS);
+			onStopped = () => { clearTimeout(timer); resolve("process-stopped"); };
 			onLine = (line) => {
 				writeFileSync(eventsPath, line + "\n", { flag: "a" });
 				let record;
@@ -79,19 +79,26 @@ async function runSession(arm, rep) {
 			};
 			child.stdin.write(JSON.stringify({ id: `turn-${n}`, type: "prompt", message: turn.prompt }) + "\n");
 		});
+		if (outcome !== "settled") {
+			child.kill();
+			await stopped;
+		}
 		snapshot(dir, `t${n}-end`);
 		const testsPass = spawnSync(process.execPath, ["--test"], { cwd: dir, stdio: "ignore", timeout: 120_000 }).status === 0;
-		turns.push({ n, id: turn.id, outcome, sec: Math.round((Date.now() - startedAt) / 1000), testsPass, guidanceLines: countLines(join(dir, "guidance.log")) });
+		const acceptance = checkAcceptance(turn.id, dir);
+		turns.push({ n, id: turn.id, outcome, sec: Math.round((Date.now() - startedAt) / 1000), testsPass, acceptancePass: acceptance?.pass ?? null, acceptanceError: acceptance?.error, guidanceLines: countLines(guidancePath) });
 		console.log(`${new Date().toISOString().slice(11, 19)} ${arm} r${rep} turn ${n} ${turn.id} ${outcome} ${turns.at(-1).sec}s tests=${testsPass}`);
-		if (outcome === "timeout") break;
+		if (outcome !== "settled") break;
 	}
 	child.stdin.end();
 	child.kill();
-	writeFileSync(join(dir, "meta.json"), JSON.stringify({ arm, rep, turns }, null, 2));
+	await stopped;
+	writeFileSync(join(dir, "meta.json"), JSON.stringify({ arm, rep, turns, experiment }, null, 2));
 }
 
 const [reps = 3, concurrency = 3] = process.argv.slice(2).map(Number);
-const armFilter = process.env.ARMS?.split(",") ?? Object.keys(ARMS);
+const armFilter = process.env.ARMS?.split(",") ?? ["static", "plugin"];
+if (![reps, concurrency].every((value) => Number.isInteger(value) && value > 0) || armFilter.some((arm) => !Object.hasOwn(ARMS, arm))) throw new Error("Invalid repetitions, concurrency or ARMS");
 const jobs = [];
 for (let rep = 1; rep <= reps; rep++) for (const arm of armFilter) jobs.push([arm, rep]);
 let next = 0;
