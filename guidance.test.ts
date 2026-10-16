@@ -6,10 +6,8 @@ import {
 	CARDS,
 	DEFAULT_CONFIG,
 	MAX_DECISION_QUESTIONS,
-	extractAssumptions,
 	extractPlan,
 	getEndpointError,
-	getRunAssumptions,
 	parseConfig,
 	parseConfigValueReference,
 	parseDecisionResponse,
@@ -76,7 +74,7 @@ test("parseConfigValueReference follows Pi config-value conventions", () => {
 	assert.deepEqual(parseConfigValueReference("sk-literal"), { kind: "literal", value: "sk-literal" });
 });
 
-test("buildDecisionState covers the current run, earlier requests and the latest reasoning", () => {
+test("buildDecisionState preserves evidence across user messages with explicit ordering", () => {
 	const longOutput = `${"a".repeat(400)}MIDDLE${"z".repeat(400)}`;
 	const messages: TranscriptMessage[] = [
 		user("不要改公开 API"),
@@ -96,20 +94,23 @@ test("buildDecisionState covers the current run, earlier requests and the latest
 	];
 	const state = buildDecisionState(messages, withReasoning);
 	assert.equal(state.request, "新任务：修 divide");
-	assert.deepEqual(state.earlierRequests, ["不要改公开 API", "old task"]);
-	assert.deepEqual(state.earlierSteps, {});
+	assert.deepEqual(state.earlierRequests, [{ messageIndex: 0, text: "不要改公开 API" }, { messageIndex: 1, text: "old task" }]);
+	assert.equal(state.omittedSteps, 0);
 	assert.deepEqual(
 		state.recentSteps.map(({ tool, status }) => [tool, status]),
 		[
+			["edit", "ok"],
 			["ffgrep", "ok"],
 			["bash", "error"],
 		],
 	);
-	assert.ok(!state.recentSteps[1].output.includes("MIDDLE"));
-	assert.ok(state.recentSteps[1].output.endsWith("z"));
-	assert.equal(state.agentMessage, "测试失败，我来看看原因");
-	assert.equal(state.agentReasoning, "测试期望 division by zero，我打算直接改断言");
-	assert.equal(buildDecisionState(messages, { sendReasoning: false }).agentReasoning, "");
+	assert.ok(state.recentSteps[0].messageIndex < state.requestIndex);
+	assert.ok(state.recentSteps[1].messageIndex > state.requestIndex);
+	assert.ok(!state.recentSteps[2].output.includes("MIDDLE"));
+	assert.ok(state.recentSteps[2].output.endsWith("z"));
+	assert.equal(state.agentMessage?.text, "测试失败，我来看看原因");
+	assert.equal(state.agentReasoning?.text, "测试期望 division by zero，我打算直接改断言");
+	assert.equal(buildDecisionState(messages, { sendReasoning: false }).agentReasoning, undefined);
 });
 
 test("extractPlan takes the last plan block in either language and markup", () => {
@@ -127,21 +128,23 @@ test("buildDecisionState carries the agent's latest written plan, even after lat
 		{ role: "assistant", content: [{ type: "text", text: "文件读完了。" }] },
 	];
 	const state = buildDecisionState(messages, withReasoning);
-	assert.equal(state.agentPlan, "计划：读 math.ts，然后引入 zod 做校验");
-	assert.equal(state.agentMessage, "文件读完了。");
+	assert.equal(state.agentPlan?.text, "计划：读 math.ts，然后引入 zod 做校验");
+	assert.equal(state.agentMessage?.text, "文件读完了。");
+	assert.ok(state.agentPlan!.messageIndex < state.recentSteps[0].resultIndex!);
+	assert.ok(state.agentPlan!.messageIndex < state.agentMessage!.messageIndex);
 });
 
 test("buildDecisionState keeps the tail of long reasoning, where the next step is planned", () => {
 	const reasoning = `${"x".repeat(3000)}下一步：安装 zod`;
 	const state = buildDecisionState([user("t"), { role: "assistant", content: [{ type: "thinking", thinking: reasoning }] }], withReasoning);
-	assert.ok(state.agentReasoning.startsWith("…"));
-	assert.ok(state.agentReasoning.endsWith("下一步：安装 zod"));
+	assert.ok(state.agentReasoning?.text.startsWith("…"));
+	assert.ok(state.agentReasoning?.text.endsWith("下一步：安装 zod"));
 });
 
 test("buildDecisionState summarises steps older than the recent window", () => {
 	const messages = [user("task"), ...Array.from({ length: 13 }, (_, i) => toolTurn(i < 3 ? "read" : "bash", { i })).flat()];
 	const state = buildDecisionState(messages, withReasoning);
-	assert.deepEqual(state.earlierSteps, { read: 3 });
+	assert.equal(state.omittedSteps, 3);
 	assert.equal(state.recentSteps.length, 10);
 });
 
@@ -170,24 +173,56 @@ test("selectCards keeps confident cards by score, capped", () => {
 	assert.deepEqual(selectCards({ a: 0.59 }, { maxCards: 4, minProbability: 0.6 }), []);
 });
 
-test("renderGuidance renders selected cards with run-specific extras", () => {
-	assert.equal(renderGuidance({ cardIds: [], request: "", assumptions: [], architectureDoc: undefined }), undefined);
+test("renderGuidance renders selected cards and the available architecture path", () => {
+	assert.equal(renderGuidance({ cardIds: [], architectureDoc: undefined }), undefined);
 	const text =
-		renderGuidance({ cardIds: ["delivery", "context", "scope"], request: "修 divide", assumptions: ["金额以分为单位"], architectureDoc: "ARCHITECTURE.md" }) ?? "";
-	assert.ok(text.startsWith("<engineering-guidance>\n【交付报告】"));
-	for (const fragment of ["金额以分为单位", "【上下文与假设核验】", "ARCHITECTURE.md", "【任务锚点与行动边界】", "「修 divide」"]) {
+		renderGuidance({ cardIds: ["delivery", "context", "scope"], architectureDoc: "ARCHITECTURE.md" }) ?? "";
+	assert.ok(text.startsWith("<engineering-guidance>"));
+	for (const fragment of ["【交付报告】", "【上下文与假设核验】", "ARCHITECTURE.md", "【任务锚点与行动边界】"]) {
 		assert.ok(text.includes(fragment), fragment);
 	}
 });
 
-test("assumptions are collected from any tool call in the run", () => {
+test("short continuations retain the original constraints and tool evidence", () => {
 	const messages = [
-		user("old"),
-		...toolTurn("write", { content: "// @ASSUMPTION: 旧任务\n" }),
-		user("new"),
-		...toolTurn("edit", { edits: [{ oldText: "a", newText: "// @ASSUMPTION: 时区固定 UTC\nb" }] }),
-		...toolTurn("apply_patch", { patch: "+# @ASSUMPTION: 订单不可部分退款\n" }),
+		user("修复缓存，全程不要改公开 API"),
+		...toolTurn("read", { path: "cache.ts" }),
+		user("继续定位"), user("现在修复"), user("继续"),
 	];
-	assert.deepEqual(getRunAssumptions(messages), ["时区固定 UTC", "订单不可部分退款"]);
-	assert.deepEqual(extractAssumptions("/* @ASSUMPTION: x */"), ["x"]);
+	const state = buildDecisionState(messages, withReasoning);
+	assert.equal(state.request, "继续");
+	assert.equal(state.earlierRequests[0].text, "修复缓存，全程不要改公开 API");
+	assert.equal(state.omittedRequests, 0);
+	assert.equal(state.recentSteps[0].tool, "read");
+});
+
+test("new user instructions are distinguishable from an earlier plan and completed actions", () => {
+	const messages = [user("安装依赖"), { role: "assistant", content: "计划：安装 zod" }, ...toolTurn("bash", { command: "npm install zod" }), user("停止安装，改为只解释方案")];
+	const state = buildDecisionState(messages, withReasoning);
+	assert.equal(state.request, "停止安装，改为只解释方案");
+	assert.ok(state.agentPlan!.messageIndex < state.requestIndex);
+	assert.ok(state.recentSteps[0].resultIndex! < state.requestIndex);
+});
+
+test("context budgets bound long and tiny histories while retaining text boundaries", () => {
+	const state = buildDecisionState([...Array.from({ length: 1000 }, () => user("x")), user(`START${"x".repeat(4000)}END`), ...toolTurn("edit", { text: "x".repeat(4000), path: "important.ts" })], withReasoning);
+	assert.ok(state.earlierRequests.length < 100);
+	assert.ok(state.omittedRequests > 0);
+	assert.ok(state.request.length <= 2000);
+	assert.ok(state.request.startsWith("START"));
+	assert.ok(state.request.endsWith("END"));
+	assert.ok(state.recentSteps[0].input.includes("important.ts"));
+	assert.ok(state.recentSteps[0].input.length <= 600);
+	const longHistory = buildDecisionState(Array.from({ length: 10 }, (_, i) => user(`${i}${"x".repeat(2000)}`)), withReasoning);
+	assert.ok(longHistory.earlierRequests.reduce((n, entry) => n + entry.text.length + 40, 0) <= 3000);
+});
+
+test("pending calls, absent user text and project guidance remain explicit", () => {
+	const state = buildDecisionState([{ role: "assistant", content: [{ type: "toolCall", id: "pending", name: "bash", arguments: { command: "npm test" } }] }], { sendReasoning: false, projectRules: "使用项目既有组件" });
+	assert.equal(state.requestIndex, -1);
+	assert.equal(state.request, "");
+	assert.equal(state.omittedRequests, 0);
+	assert.equal(state.recentSteps[0].status, "pending");
+	assert.equal(state.recentSteps[0].resultIndex, undefined);
+	assert.equal(state.projectRules, "使用项目既有组件");
 });
