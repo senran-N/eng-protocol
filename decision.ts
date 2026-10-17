@@ -1,7 +1,7 @@
 // HTTP client for a System One decision endpoint (choice questions -> per-option probabilities).
 import http from "node:http";
 import https from "node:https";
-import type { DecisionSource } from "./guidance.ts";
+import { batchDecisionQuestions, buildDecisionQuestions, buildDecisionRequest, parseDecisionResponse, type DecisionProbabilities, type DecisionQuestion, type DecisionSource, type DecisionState } from "./guidance.ts";
 
 const MAX_RESPONSE_BYTES = 1_048_576;
 
@@ -63,4 +63,35 @@ export function requestDecision(source: DecisionSource, payload: unknown, signal
 		request.on("error", fail);
 		request.end(JSON.stringify(payload));
 	});
+}
+
+/** Evaluate a complete snapshot with at most two HTTP requests in flight. A failed batch cancels its siblings. */
+export async function evaluateDecision(source: DecisionSource, state: DecisionState, signal: AbortSignal, questions: readonly DecisionQuestion[] = buildDecisionQuestions()): Promise<{ probabilities: DecisionProbabilities; batchCount: number; questionCount: number }> {
+	const batches = batchDecisionQuestions(questions);
+	if (new Set(questions.map((question) => question.id)).size !== questions.length) throw new Error("决策问题 ID 重复");
+	const controller = new AbortController();
+	const combinedSignal = AbortSignal.any([signal, controller.signal]);
+	const results: DecisionProbabilities[] = new Array(batches.length);
+	let next = 0;
+	let failed = false;
+	let failure: unknown;
+	async function worker() {
+		while (next < batches.length) {
+			combinedSignal.throwIfAborted();
+			const index = next++;
+			try {
+				const body = await requestDecision(source, buildDecisionRequest(source.model, state, batches[index]), combinedSignal);
+				combinedSignal.throwIfAborted();
+				results[index] = parseDecisionResponse(body, batches[index]);
+			} catch (error) {
+				if (!failed) { failed = true; failure = error; }
+				controller.abort();
+				throw error;
+			}
+		}
+	}
+	await Promise.allSettled(Array.from({ length: Math.min(2, batches.length) }, () => worker()));
+	if (failed) throw failure;
+	combinedSignal.throwIfAborted();
+	return { probabilities: Object.assign({}, ...results), batchCount: batches.length, questionCount: questions.length };
 }

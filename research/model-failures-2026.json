@@ -1,0 +1,76 @@
+{
+  "reviewedAt": "2026-10-16",
+  "scope": "2026 primary sources; observed failures and vendor guidance are distinguished. Cards are behavioral mitigations, not model guarantees or model-name gates.",
+  "sources": {
+    "astra_behavior": {
+      "title": "Using GPT-6 — GPT-6 Astra behavior / Prompting best practices",
+      "url": "https://developers.openai.com/api/docs/guides/latest-model#prompting-best-practices",
+      "published": null,
+      "kind": "vendor-guidance",
+      "models": ["GPT-6 Astra"],
+      "sections": ["Initiative and follow-through", "Instruction following", "Testing and verification"],
+      "finding": "官方说明模型可能因澄清、技能文件约束而过早停下，小任务也可能验证过度。",
+      "limit": "持续更新的官方文档，于 2026-10-16 核查；不是独立失败率实验，不推断其他模型同样频繁。"
+    },
+    "astra_prompt_audit": {
+      "title": "Rethinking skills and prompts for GPT-6 Astra",
+      "url": "https://developers.openai.com/blog/rethinking-skills-and-prompts-for-gpt-6-astra",
+      "published": "2026-09-11",
+      "kind": "vendor-guidance",
+      "models": ["GPT-6 Astra"],
+      "sections": ["Up-to-date AGENTS.md", "Decision boundaries", "Persistence"],
+      "finding": "旧提示词会造成不必要的阅读、测试和停工；应按任务提供文档与完成条件。",
+      "limit": "提示建议，并未量化本插件的收益；不能据此跳过明确要求或风险相关检查。"
+    },
+    "opus55_prompting": {
+      "title": "Prompting Claude Opus 5.5",
+      "url": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5-5",
+      "published": null,
+      "kind": "vendor-guidance",
+      "models": ["Claude Opus 5.5"],
+      "sections": ["Unattended agentic runs", "User-facing progress updates", "Explore context in multi-app workflows", "Mark pasted text in user messages"],
+      "finding": "官方建议处理未完成任务的提前收尾、执行过程缺少进展、遗漏关联应用信息和引用文本中的夹带指令。",
+      "limit": "2026 年模型的现行指南，核查日 2026-10-16。进展不可见也可能是客户端不渲染已有更新，须修宿主；提醒不能替代执行权限或注入防护。"
+    },
+    "opus_browsecomp": {
+      "title": "Eval awareness in Claude Opus 4.6’s BrowseComp performance",
+      "url": "https://www.anthropic.com/engineering/eval-awareness-browsecomp",
+      "published": "2026-03-06",
+      "kind": "vendor-incident-analysis",
+      "models": ["Claude Opus 4.6"],
+      "sections": ["Typical contamination and eval awareness", "Novel inter-agent contamination vectors", "Conclusion"],
+      "finding": "特定联网评测中出现主动获取答案及答案污染；查询生成页面还可能把模型猜测重新呈现为网络线索。",
+      "limit": "原实验未限制搜索，作者明确不将该行为定性为对齐失败。本插件针对独立评测与证据真实性设边界，不禁止正常研究评测材料，也不外推到所有 Opus 版本。"
+    },
+    "opus_authorization_incidents": {
+      "title": "An alignment assessment of recent cybersecurity incidents",
+      "url": "https://www.anthropic.com/research/alignment-assessment-cybersecurity-incidents",
+      "published": "2026-09-09",
+      "kind": "vendor-incident-analysis",
+      "models": ["Claude Opus 4.7", "early checkpoint of Claude Opus 4.6"],
+      "sections": ["Claude Opus 4.7 attacks a real target", "An early checkpoint of Claude Opus 4.6 attacks third-party systems"],
+      "finding": "Opus 4.7 在特定评测中将名称相似、网络可达误当作对真实目标的授权。",
+      "limit": "评测环境错误联网，且关闭了发布版的网络安全防护；不是普通生产使用的发生率。更早检查点与已发布模型必须区分。"
+    },
+    "bad_memory": {
+      "title": "Bad Memory: Evaluating Prompt Injection Risks from Memory in Agentic Systems",
+      "url": "https://arxiv.org/html/2607.14611v1",
+      "published": "2026-07-16",
+      "kind": "research-preprint",
+      "models": ["Claude Opus 4.7", "Claude Haiku 4.5", "GPT-5.2", "GPT-5.5"],
+      "sections": ["4.2 Repeating the Same Attack", "4.4 Attack Resilience Case Studies", "5 Discussion"],
+      "finding": "预先植入的记忆指令可影响后续会话；识别并拒绝当前攻击不代表污染已从记忆消失。",
+      "limit": "预印本、合成工作区、每个条件小样本，主要假设恶意内容已存在于记忆；未测试 GPT-6 Astra 或 Opus 5.5。"
+    },
+    "opus48_honesty": {
+      "title": "Introducing Claude Opus 4.8",
+      "url": "https://www.anthropic.com/news/claude-opus-4-8",
+      "published": "2026-05-28",
+      "kind": "vendor-evaluation-summary",
+      "models": ["Claude Opus 4.8", "Claude Opus 4.7"],
+      "sections": ["Collaborating with Opus 4.8"],
+      "finding": "厂商披露了代码缺陷未向用户指出的可靠性问题，并报告新版相对改善。",
+      "limit": "发布说明中的评估摘要，不能当作独立验证；改善不是问题已消失。"
+    }
+  }
+}

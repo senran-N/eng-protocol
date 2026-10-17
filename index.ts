@@ -9,16 +9,14 @@
  * - /protocol:           status | on | off | reload | show
  */
 import { exec } from "node:child_process";
-import { readFileSync } from "node:fs";
 import { access, readFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 import type { ContextEvent, ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
-import { closeDecisionClient, requestDecision } from "./decision.ts";
+import { closeDecisionClient, evaluateDecision } from "./decision.ts";
 import {
-	buildDecisionRequest,
 	buildDecisionState,
 	CARDS,
 	DEFAULT_CONFIG,
@@ -26,13 +24,14 @@ import {
 	type DecisionSource,
 	type DecisionState,
 	type ProtocolConfig,
+	type GuidanceSelection,
 	parseConfig,
 	parseConfigValueReference,
-	parseDecisionResponse,
 	parseProjectConfig,
 	PLAN_INSTRUCTION,
 	renderGuidance,
-	selectCards,
+	selectGuidance,
+	RULE_STATE_LABELS,
 } from "./guidance.ts";
 
 type AgentMessage = ContextEvent["messages"][number];
@@ -46,6 +45,7 @@ const PROTOCOL_PATH = join(dirname(fileURLToPath(import.meta.url)), "protocol.md
 const ARCHITECTURE_CANDIDATES = ["ARCHITECTURE.md", "docs/ARCHITECTURE.md", "docs/architecture.md"];
 
 interface SessionSettings {
+	protocolText: string;
 	config: ProtocolConfig;
 	configErrors: string[];
 	source: DecisionSource | { error: string };
@@ -53,11 +53,11 @@ interface SessionSettings {
 	architectureDoc: string | undefined;
 }
 
-interface Decided {
+interface Decided extends GuidanceSelection {
 	kind: "decided";
 	stateKey: string;
-	scores: Record<string, number>;
-	cardIds: string[];
+	batchCount: number;
+	questionCount: number;
 	latencyMs: number;
 }
 
@@ -125,6 +125,7 @@ async function loadSessionSettings(cwd: string): Promise<SessionSettings> {
 		configErrors.push(...parsed.errors);
 	}
 
+	const protocolText = await readFile(PROTOCOL_PATH, "utf8");
 	const source = await resolveDecisionSource(config.decision);
 	const projectRules = (await readOptionalFile(join(cwd, ".pi", "eng-protocol.md")))?.trim() || undefined;
 	let architectureDoc: string | undefined;
@@ -133,7 +134,7 @@ async function loadSessionSettings(cwd: string): Promise<SessionSettings> {
 		architectureDoc = candidate;
 		break;
 	}
-	return { config, configErrors, source, projectRules, architectureDoc };
+	return { protocolText, config, configErrors, source, projectRules, architectureDoc };
 }
 
 /** Copy of `messages` whose last message carries the guidance; earlier messages stay identical for prompt caching. */
@@ -165,15 +166,36 @@ function getOutcomeLabel(outcome: DecisionOutcome): string {
 }
 
 export default function engProtocol(pi: ExtensionAPI) {
-	const protocolText = readFileSync(PROTOCOL_PATH, "utf8");
 	let settings: SessionSettings | undefined;
 	let enabledOverride: boolean | undefined;
 	let outcome: DecisionOutcome = { kind: "none" };
 	let lastDecided: Decided | undefined;
 	let lastGuidance: string | undefined;
+	let decisionController = new AbortController();
+	let activeDecision: AbortController | undefined;
 	const notified = new Set<string>();
 
 	const isEnabled = () => enabledOverride ?? settings?.config.enabled ?? DEFAULT_CONFIG.enabled;
+
+	function resetDecision() {
+		activeDecision?.abort();
+		activeDecision = undefined;
+		decisionController.abort();
+		decisionController = new AbortController();
+		outcome = { kind: "none" };
+		lastDecided = undefined;
+		lastGuidance = undefined;
+	}
+
+	async function reloadSettings(cwd: string) {
+		resetDecision();
+		const loaded = await loadSessionSettings(cwd);
+		// Also invalidate requests that began while the settings were being read.
+		resetDecision();
+		settings = loaded;
+		notified.clear();
+		return loaded;
+	}
 
 	function notifyOnce(ctx: ExtensionContext, message: string) {
 		if (notified.has(message)) return;
@@ -199,23 +221,24 @@ export default function engProtocol(pi: ExtensionAPI) {
 		ctx.ui.setStatus(STATUS_KEY, theme.fg("accent", `⚖ ${focus}`));
 	}
 
-	async function decide(source: DecisionSource, state: DecisionState, ctx: ExtensionContext): Promise<Decided | undefined> {
+	async function decide(source: DecisionSource, state: DecisionState, ctx: ExtensionContext, lifecycleSignal: AbortSignal, contextSignal: AbortSignal): Promise<Decided | undefined> {
 		const stateKey = JSON.stringify(state);
 		if (lastDecided?.stateKey === stateKey) {
 			outcome = lastDecided;
 			return lastDecided;
 		}
-		const timeoutMs = settings?.config.decision.timeoutMs ?? DEFAULT_CONFIG.decision.timeoutMs;
-		const signal = AbortSignal.any([AbortSignal.timeout(timeoutMs), ...(ctx.signal ? [ctx.signal] : [])]);
+		const config = settings?.config ?? DEFAULT_CONFIG;
+		const signal = AbortSignal.any([lifecycleSignal, contextSignal, AbortSignal.timeout(config.decision.timeoutMs), ...(ctx.signal ? [ctx.signal] : [])]);
 		const startedAt = performance.now();
 		try {
-			const body = await requestDecision(source, buildDecisionRequest(source.model, state, CARDS), signal);
-			const scores = parseDecisionResponse(body, CARDS);
-			const cardIds = selectCards(scores, settings?.config ?? DEFAULT_CONFIG);
-			lastDecided = { kind: "decided", stateKey, scores, cardIds, latencyMs: Math.round(performance.now() - startedAt) };
+			const { probabilities, batchCount, questionCount } = await evaluateDecision(source, state, signal);
+			signal.throwIfAborted();
+			const selection = selectGuidance(probabilities, config);
+			lastDecided = { kind: "decided", stateKey, ...selection, batchCount, questionCount, latencyMs: Math.round(performance.now() - startedAt) };
 			outcome = lastDecided;
 			return lastDecided;
 		} catch (error) {
+			if (lifecycleSignal.aborted || contextSignal.aborted) return undefined;
 			lastDecided = undefined;
 			if (ctx.signal?.aborted) {
 				outcome = { kind: "none" };
@@ -229,24 +252,21 @@ export default function engProtocol(pi: ExtensionAPI) {
 	}
 
 	pi.on("session_start", async (_event, ctx) => {
-		settings = await loadSessionSettings(ctx.cwd);
-		outcome = { kind: "none" };
-		lastDecided = undefined;
-		lastGuidance = undefined;
-		notified.clear();
-		for (const error of settings.configErrors) notifyOnce(ctx, error);
-		if ("error" in settings.source) notifyOnce(ctx, `阶段引导停用：${settings.source.error}`);
+		const loaded = await reloadSettings(ctx.cwd);
+		for (const error of loaded.configErrors) notifyOnce(ctx, error);
+		if ("error" in loaded.source) notifyOnce(ctx, `阶段引导停用：${loaded.source.error}`);
 		updateStatus(ctx);
 	});
 
 	pi.on("session_shutdown", async () => {
+		resetDecision();
 		closeDecisionClient();
 	});
 
 	pi.on("before_agent_start", async (event) => {
-		if (!isEnabled()) return;
+		if (!isEnabled() || !settings) return;
 		const sections = event.systemPromptOptions.sections;
-		sections.engineering_protocol = protocolText;
+		sections.engineering_protocol = settings.protocolText;
 		sections.engineering_plan = PLAN_INSTRUCTION;
 		if (settings?.projectRules) sections.project_engineering_rules = settings.projectRules;
 	});
@@ -254,11 +274,17 @@ export default function engProtocol(pi: ExtensionAPI) {
 	// context_with_system runs after every `context` handler, so transcript rebuilders such as
 	// billion-context-pi cannot drop the guidance. appendGuidance never touches the leading system message.
 	pi.on("context_with_system", async (event, ctx) => {
+		// This request owns the result through injection, including the asynchronous cache-hit path.
+		activeDecision?.abort();
+		const currentDecision = new AbortController();
+		activeDecision = currentDecision;
 		lastGuidance = undefined;
 		if (!isEnabled() || !settings || "error" in settings.source || ctx.signal?.aborted) return;
-		const decided = await decide(settings.source, buildDecisionState(event.messages, { ...settings.config, projectRules: settings.projectRules }), ctx);
+		const lifecycleSignal = decisionController.signal;
+		const decided = await decide(settings.source, buildDecisionState(event.messages, { ...settings.config, projectRules: settings.projectRules }), ctx, lifecycleSignal, currentDecision.signal);
+		if (lifecycleSignal.aborted || currentDecision.signal.aborted) return;
 		updateStatus(ctx);
-		if (!decided) return;
+		if (!decided || ctx.signal?.aborted) return;
 		const guidance = renderGuidance({
 			cardIds: decided.cardIds,
 			architectureDoc: settings.architectureDoc,
@@ -288,30 +314,31 @@ export default function engProtocol(pi: ExtensionAPI) {
 			description: "本会话停用",
 			run: () => {
 				enabledOverride = false;
-				lastGuidance = undefined;
+				resetDecision();
 				return "eng-protocol 已停用（本会话）";
 			},
 		},
 		reload: {
-			description: "重新读取配置、决策源、项目规则与架构锚点",
+			description: "重新读取规范、配置、决策源、项目规则与架构锚点",
 			run: async (ctx) => {
-				settings = await loadSessionSettings(ctx.cwd);
-				lastDecided = undefined;
-				lastGuidance = undefined;
-				outcome = { kind: "none" };
-				notified.clear();
-				const problems = [...settings.configErrors, ...("error" in settings.source ? [settings.source.error] : [])];
+				const loaded = await reloadSettings(ctx.cwd);
+				const problems = [...loaded.configErrors, ...("error" in loaded.source ? [loaded.source.error] : [])];
 				return problems.length > 0 ? `已重载，存在问题：\n${problems.join("\n")}` : "已重载";
 			},
 		},
 		show: {
-			description: "显示最近一次决策的各卡片得分与注入内容",
+			description: "显示规则状态、关系裁决、请求数量与实际注入内容",
 			run: () => {
 				if (!lastDecided) return `最近一次决策：${getOutcomeLabel(outcome)}\n本次未注入动态提醒。`;
-				const ranking = Object.entries(lastDecided.scores)
-					.sort(([, a], [, b]) => b - a)
-					.map(([id, yes]) => `${lastDecided?.cardIds.includes(id) ? "▶" : " "} ${yes.toFixed(2)}  ${getCardTitles([id])}`);
-				return [`协议文本：${PROTOCOL_PATH}`, `决策耗时：${lastDecided.latencyMs}ms`, ...ranking, "", lastGuidance ?? "（本次未注入）"].join("\n");
+				const decided = lastDecided;
+				const labels = { selected: "已选", state: "无需注入", covered: "被覆盖", blocked: "行动受阻", prerequisite: "前置条件未解决", limit: "超出注入上限" };
+				const ranking = Object.entries(decided.assessments)
+					.sort(([, a], [, b]) => b.probabilities.needed - a.probabilities.needed)
+					.map(([id, assessment]) => {
+						const reason = decided.reasons[id];
+						return `${decided.cardIds.includes(id) ? "▶" : " "} ${assessment.probabilities.needed.toFixed(2)} ${getCardTitles([id])}：${RULE_STATE_LABELS[assessment.state]}；${labels[reason.kind]}${reason.by ? `（${getCardTitles([reason.by])}）` : ""}`;
+					});
+				return [`协议文本：${PROTOCOL_PATH}`, `决策耗时：${decided.latencyMs}ms；${decided.questionCount} 个问题 / ${decided.batchCount} 个请求`, "以下状态为本次证据快照的模型判断，分数为 P(需要处理)。", ...ranking, `关系条件成立：${decided.activeRelations.join("、") || "无"}`, "", lastGuidance ?? "（本次未注入）"].join("\n");
 			},
 		},
 	};

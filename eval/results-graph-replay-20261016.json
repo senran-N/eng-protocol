@@ -1,0 +1,3074 @@
+{
+  "experiment": {
+    "model": "srapi/gpt-6-luna",
+    "thinking": "medium",
+    "node": "v24.14.0",
+    "commit": "97758624842f28e8501f19dd0bd04ecf7f075a6e",
+    "hashes": {
+      "protocol.md": "97630b6b11695415fffdda2ca6a18cdd5b9b8ad0186f51cb78db3ad8c5aace18",
+      "guidance.ts": "6dd2c365e52be4e3daf20d8e74b3d641c066e0f9b4441078ec634513a662d131",
+      "index.ts": "d4c46c982468fb75e607fbf17e5b258b1c69a67478267cd80f4c0b61004b303e",
+      "decision.ts": "4d6692e93e5f12d3746ca0dd680a9be0f91f181262c32bc7dc5269458926cc0d",
+      "eval/static.ts": "54c154ba430dd9e8cce9468a4ab98d45f097e70e24898cbf0a5571dd49a5d710",
+      "eval/guidance-log.ts": "8f862deeae5f1ac10f145bf696378d2c28876a4bb517d0fc7c5911e531b17e46",
+      "eval/checks.mjs": "3bdbbd346ba44dfaa7c2da8c55a5953ab4a99d61fea57e3121e46ec7534c836a",
+      "eval/fixtures.mjs": "da6970e57f8e9fa4730fb19d140546d53b48d544298fcad9e227928523933b03",
+      "eval/run.mjs": "91813eb244d1a342eafa08e0c7ced1eeccde468ba2abcde376c9c693f1d172a6",
+      "eval/score.mjs": "9e90891cca1a2f5e79a9749121ab8b6e56135604ce4e6ffe05cea55aec948f73",
+      "eval/experiment.mjs": "e70be64ac1d0c94fe3def7616d432c73153b641dc37988fc7a05dbd62f28ae09",
+      "eval/routing.mjs": "8f4a0b84e944170e1390a478b094c080afbe10ab3c75286201233b6545d11496",
+      "eval/long/scenario.mjs": "ffe63e684ef6bf10e25bb58a80182ef8af7f5fd67fe54c800cda50057512417b",
+      "eval/long/run.mjs": "8d74b97eae1efc24007f088da0d59d873562eae7b2c242c80612c02d455f32a2",
+      "eval/long/score.mjs": "d03da4b1173a6b6324d532cc9f7829fe53cc9213fe55a106d10beca6b4657b9b"
+    },
+    "config": {
+      "maxCards": 3,
+      "minProbability": 0.6,
+      "sendReasoning": true,
+      "enabled": true,
+      "decision": {
+        "endpoint": "https://api.subq.ai/v1/systemone",
+        "model": "subq-snap-preview",
+        "timeoutMs": 4000
+      }
+    }
+  },
+  "caseFile": "eval/replay-cases-20261016.json",
+  "caseHash": "245ecba0d505187e6b50dc90fd3d3be50c43f2db9993123c6297b36e940267d0",
+  "caseIds": [
+    "recorded_slug_verified",
+    "recorded_conflict_asking",
+    "recorded_authorized_removal_verified"
+  ],
+  "baselineRef": "HEAD",
+  "baselineHash": "35fe5a792acc7a47ea7b1d69a5fc3e2572eb32f7aadbd44a6d65ba9fbd45b3fd",
+  "rows": [
+    {
+      "arm": "candidate",
+      "case": "recorded_slug_verified",
+      "comparable": true,
+      "pass": true,
+      "selected": [],
+      "cardIds": [],
+      "assessments": {
+        "context": {
+          "state": "satisfied",
+          "probabilities": {
+            "needed": 0.01982734724879265,
+            "addressing": 0.0691690742969513,
+            "satisfied": 0.7427219152450562,
+            "inapplicable": 0.15691342949867249,
+            "unknown": 0.011368234641849995
+          }
+        },
+        "navigation": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.015347115695476532,
+            "addressing": 0.05960986763238907,
+            "satisfied": 0.22795751690864563,
+            "inapplicable": 0.6830183863639832,
+            "unknown": 0.014067131094634533
+          }
+        },
+        "research": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.018797114491462708,
+            "addressing": 0.01673205755650997,
+            "satisfied": 0.09057669341564178,
+            "inapplicable": 0.8590407967567444,
+            "unknown": 0.014853287488222122
+          }
+        },
+        "topology": {
+          "state": "satisfied",
+          "probabilities": {
+            "needed": 0.04339880123734474,
+            "addressing": 0.08504044264554977,
+            "satisfied": 0.6730682849884033,
+            "inapplicable": 0.17188146710395813,
+            "unknown": 0.026611074805259705
+          }
+        },
+        "halt": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.020126502960920334,
+            "addressing": 0.027117956429719925,
+            "satisfied": 0.07520448416471481,
+            "inapplicable": 0.8607107996940613,
+            "unknown": 0.016840314492583275
+          }
+        },
+        "scope": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.010977360419929028,
+            "addressing": 0.026612820103764534,
+            "satisfied": 0.20863130688667297,
+            "inapplicable": 0.7433280348777771,
+            "unknown": 0.01045040413737297
+          }
+        },
+        "modeling": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.015460195951163769,
+            "addressing": 0.01829536259174347,
+            "satisfied": 0.12383896112442017,
+            "inapplicable": 0.8263599276542664,
+            "unknown": 0.01604544185101986
+          }
+        },
+        "surgical": {
+          "state": "unknown",
+          "probabilities": {
+            "needed": 0.018403859809041023,
+            "addressing": 0.04151572287082672,
+            "satisfied": 0.4317135512828827,
+            "inapplicable": 0.4920337200164795,
+            "unknown": 0.016333239153027534
+          }
+        },
+        "control_flow": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.014967842027544975,
+            "addressing": 0.01635679416358471,
+            "satisfied": 0.09987734258174896,
+            "inapplicable": 0.8535807728767395,
+            "unknown": 0.01521721389144659
+          }
+        },
+        "cqs": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.011505309492349625,
+            "addressing": 0.021458618342876434,
+            "satisfied": 0.07027600705623627,
+            "inapplicable": 0.8799102902412415,
+            "unknown": 0.01684974692761898
+          }
+        },
+        "diagnostics": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.022337656468153,
+            "addressing": 0.03397735208272934,
+            "satisfied": 0.04804972931742668,
+            "inapplicable": 0.8733590245246887,
+            "unknown": 0.022276176139712334
+          }
+        },
+        "systems": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.019975893199443817,
+            "addressing": 0.0481235645711422,
+            "satisfied": 0.12550783157348633,
+            "inapplicable": 0.789580225944519,
+            "unknown": 0.016812503337860107
+          }
+        },
+        "concurrency": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.015162710100412369,
+            "addressing": 0.021948102861642838,
+            "satisfied": 0.04606664180755615,
+            "inapplicable": 0.8980713486671448,
+            "unknown": 0.01875116303563118
+          }
+        },
+        "input_boundary": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.019987618550658226,
+            "addressing": 0.023297933861613274,
+            "satisfied": 0.04660028964281082,
+            "inapplicable": 0.8904829025268555,
+            "unknown": 0.019631292670965195
+          }
+        },
+        "compatibility": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.015272678807377815,
+            "addressing": 0.01865403540432453,
+            "satisfied": 0.0453689880669117,
+            "inapplicable": 0.8986251950263977,
+            "unknown": 0.022079134359955788
+          }
+        },
+        "architecture": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.021635010838508606,
+            "addressing": 0.03577806428074837,
+            "satisfied": 0.06851132214069366,
+            "inapplicable": 0.8461652994155884,
+            "unknown": 0.027910208329558372
+          }
+        },
+        "ui": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.011687738820910454,
+            "addressing": 0.015533655881881714,
+            "satisfied": 0.021543385460972786,
+            "inapplicable": 0.9347543716430664,
+            "unknown": 0.016480812802910805
+          }
+        },
+        "no_cheat": {
+          "state": "unknown",
+          "probabilities": {
+            "needed": 0.015928640961647034,
+            "addressing": 0.03407956287264824,
+            "satisfied": 0.40572139620780945,
+            "inapplicable": 0.5319991111755371,
+            "unknown": 0.0122712766751647
+          }
+        },
+        "verify": {
+          "state": "satisfied",
+          "probabilities": {
+            "needed": 0.022166024893522263,
+            "addressing": 0.03497390076518059,
+            "satisfied": 0.8993655443191528,
+            "inapplicable": 0.031054766848683357,
+            "unknown": 0.01243983767926693
+          }
+        },
+        "two_strike": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.01646234840154648,
+            "addressing": 0.022172166034579277,
+            "satisfied": 0.13045094907283783,
+            "inapplicable": 0.8188257813453674,
+            "unknown": 0.012088783085346222
+          }
+        },
+        "delivery": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.009175777435302734,
+            "addressing": 0.06844192743301392,
+            "satisfied": 0.11749868094921112,
+            "inapplicable": 0.7898255586624146,
+            "unknown": 0.015057999640703201
+          }
+        },
+        "reporting": {
+          "state": "unknown",
+          "probabilities": {
+            "needed": 0.03496934473514557,
+            "addressing": 0.09566092491149902,
+            "satisfied": 0.536439061164856,
+            "inapplicable": 0.2389695942401886,
+            "unknown": 0.09396101534366608
+          }
+        },
+        "candor": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.041844286024570465,
+            "addressing": 0.06309856474399567,
+            "satisfied": 0.08259663730859756,
+            "inapplicable": 0.7873932123184204,
+            "unknown": 0.025067323818802834
+          }
+        }
+      },
+      "reasons": {
+        "context": {
+          "kind": "state"
+        },
+        "navigation": {
+          "kind": "state"
+        },
+        "research": {
+          "kind": "state"
+        },
+        "topology": {
+          "kind": "state"
+        },
+        "halt": {
+          "kind": "state"
+        },
+        "scope": {
+          "kind": "state"
+        },
+        "modeling": {
+          "kind": "state"
+        },
+        "surgical": {
+          "kind": "state"
+        },
+        "control_flow": {
+          "kind": "state"
+        },
+        "cqs": {
+          "kind": "state"
+        },
+        "diagnostics": {
+          "kind": "state"
+        },
+        "systems": {
+          "kind": "state"
+        },
+        "concurrency": {
+          "kind": "state"
+        },
+        "input_boundary": {
+          "kind": "state"
+        },
+        "compatibility": {
+          "kind": "state"
+        },
+        "architecture": {
+          "kind": "state"
+        },
+        "ui": {
+          "kind": "state"
+        },
+        "no_cheat": {
+          "kind": "state"
+        },
+        "verify": {
+          "kind": "state"
+        },
+        "two_strike": {
+          "kind": "state"
+        },
+        "delivery": {
+          "kind": "state"
+        },
+        "reporting": {
+          "kind": "state"
+        },
+        "candor": {
+          "kind": "state"
+        }
+      },
+      "activeRelations": [],
+      "probabilities": {
+        "context": {
+          "needed": 0.01982734724879265,
+          "addressing": 0.0691690742969513,
+          "satisfied": 0.7427219152450562,
+          "inapplicable": 0.15691342949867249,
+          "unknown": 0.011368234641849995
+        },
+        "navigation": {
+          "needed": 0.015347115695476532,
+          "addressing": 0.05960986763238907,
+          "satisfied": 0.22795751690864563,
+          "inapplicable": 0.6830183863639832,
+          "unknown": 0.014067131094634533
+        },
+        "research": {
+          "needed": 0.018797114491462708,
+          "addressing": 0.01673205755650997,
+          "satisfied": 0.09057669341564178,
+          "inapplicable": 0.8590407967567444,
+          "unknown": 0.014853287488222122
+        },
+        "topology": {
+          "needed": 0.04339880123734474,
+          "addressing": 0.08504044264554977,
+          "satisfied": 0.6730682849884033,
+          "inapplicable": 0.17188146710395813,
+          "unknown": 0.026611074805259705
+        },
+        "halt": {
+          "needed": 0.020126502960920334,
+          "addressing": 0.027117956429719925,
+          "satisfied": 0.07520448416471481,
+          "inapplicable": 0.8607107996940613,
+          "unknown": 0.016840314492583275
+        },
+        "scope": {
+          "needed": 0.010977360419929028,
+          "addressing": 0.026612820103764534,
+          "satisfied": 0.20863130688667297,
+          "inapplicable": 0.7433280348777771,
+          "unknown": 0.01045040413737297
+        },
+        "modeling": {
+          "needed": 0.015460195951163769,
+          "addressing": 0.01829536259174347,
+          "satisfied": 0.12383896112442017,
+          "inapplicable": 0.8263599276542664,
+          "unknown": 0.01604544185101986
+        },
+        "surgical": {
+          "needed": 0.018403859809041023,
+          "addressing": 0.04151572287082672,
+          "satisfied": 0.4317135512828827,
+          "inapplicable": 0.4920337200164795,
+          "unknown": 0.016333239153027534
+        },
+        "control_flow": {
+          "needed": 0.014967842027544975,
+          "addressing": 0.01635679416358471,
+          "satisfied": 0.09987734258174896,
+          "inapplicable": 0.8535807728767395,
+          "unknown": 0.01521721389144659
+        },
+        "cqs": {
+          "needed": 0.011505309492349625,
+          "addressing": 0.021458618342876434,
+          "satisfied": 0.07027600705623627,
+          "inapplicable": 0.8799102902412415,
+          "unknown": 0.01684974692761898
+        },
+        "diagnostics": {
+          "needed": 0.022337656468153,
+          "addressing": 0.03397735208272934,
+          "satisfied": 0.04804972931742668,
+          "inapplicable": 0.8733590245246887,
+          "unknown": 0.022276176139712334
+        },
+        "systems": {
+          "needed": 0.019975893199443817,
+          "addressing": 0.0481235645711422,
+          "satisfied": 0.12550783157348633,
+          "inapplicable": 0.789580225944519,
+          "unknown": 0.016812503337860107
+        },
+        "concurrency": {
+          "needed": 0.015162710100412369,
+          "addressing": 0.021948102861642838,
+          "satisfied": 0.04606664180755615,
+          "inapplicable": 0.8980713486671448,
+          "unknown": 0.01875116303563118
+        },
+        "input_boundary": {
+          "needed": 0.019987618550658226,
+          "addressing": 0.023297933861613274,
+          "satisfied": 0.04660028964281082,
+          "inapplicable": 0.8904829025268555,
+          "unknown": 0.019631292670965195
+        },
+        "compatibility": {
+          "needed": 0.015272678807377815,
+          "addressing": 0.01865403540432453,
+          "satisfied": 0.0453689880669117,
+          "inapplicable": 0.8986251950263977,
+          "unknown": 0.022079134359955788
+        },
+        "architecture": {
+          "needed": 0.021635010838508606,
+          "addressing": 0.03577806428074837,
+          "satisfied": 0.06851132214069366,
+          "inapplicable": 0.8461652994155884,
+          "unknown": 0.027910208329558372
+        },
+        "ui": {
+          "needed": 0.011687738820910454,
+          "addressing": 0.015533655881881714,
+          "satisfied": 0.021543385460972786,
+          "inapplicable": 0.9347543716430664,
+          "unknown": 0.016480812802910805
+        },
+        "no_cheat": {
+          "needed": 0.015928640961647034,
+          "addressing": 0.03407956287264824,
+          "satisfied": 0.40572139620780945,
+          "inapplicable": 0.5319991111755371,
+          "unknown": 0.0122712766751647
+        },
+        "verify": {
+          "needed": 0.022166024893522263,
+          "addressing": 0.03497390076518059,
+          "satisfied": 0.8993655443191528,
+          "inapplicable": 0.031054766848683357,
+          "unknown": 0.01243983767926693
+        },
+        "two_strike": {
+          "needed": 0.01646234840154648,
+          "addressing": 0.022172166034579277,
+          "satisfied": 0.13045094907283783,
+          "inapplicable": 0.8188257813453674,
+          "unknown": 0.012088783085346222
+        },
+        "delivery": {
+          "needed": 0.009175777435302734,
+          "addressing": 0.06844192743301392,
+          "satisfied": 0.11749868094921112,
+          "inapplicable": 0.7898255586624146,
+          "unknown": 0.015057999640703201
+        },
+        "reporting": {
+          "needed": 0.03496934473514557,
+          "addressing": 0.09566092491149902,
+          "satisfied": 0.536439061164856,
+          "inapplicable": 0.2389695942401886,
+          "unknown": 0.09396101534366608
+        },
+        "candor": {
+          "needed": 0.041844286024570465,
+          "addressing": 0.06309856474399567,
+          "satisfied": 0.08259663730859756,
+          "inapplicable": 0.7873932123184204,
+          "unknown": 0.025067323818802834
+        },
+        "relation_verification_covers_completion": {
+          "applies": 0.14332224428653717,
+          "independent": 0.7867245674133301,
+          "unknown": 0.06995321065187454
+        },
+        "relation_verification_covers_report": {
+          "applies": 0.44109800457954407,
+          "independent": 0.4133013188838959,
+          "unknown": 0.14560066163539886
+        },
+        "relation_repeated_fix_covers_cause": {
+          "applies": 0.03738244250416756,
+          "independent": 0.8916011452674866,
+          "unknown": 0.07101644575595856
+        },
+        "relation_decision_blocks_continuation": {
+          "applies": 0.03263812139630318,
+          "independent": 0.9093122482299805,
+          "unknown": 0.05804966762661934
+        },
+        "relation_contract_before_acceptance": {
+          "applies": 0.02206224575638771,
+          "independent": 0.9243807196617126,
+          "unknown": 0.05355711653828621
+        }
+      },
+      "batchCount": 2,
+      "questionCount": 28,
+      "reusedDecisions": false,
+      "latencyMs": 3173
+    },
+    {
+      "arm": "candidate-flat",
+      "case": "recorded_slug_verified",
+      "comparable": true,
+      "pass": true,
+      "selected": [],
+      "cardIds": [],
+      "assessments": {
+        "context": {
+          "state": "satisfied",
+          "probabilities": {
+            "needed": 0.01982734724879265,
+            "addressing": 0.0691690742969513,
+            "satisfied": 0.7427219152450562,
+            "inapplicable": 0.15691342949867249,
+            "unknown": 0.011368234641849995
+          }
+        },
+        "navigation": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.015347115695476532,
+            "addressing": 0.05960986763238907,
+            "satisfied": 0.22795751690864563,
+            "inapplicable": 0.6830183863639832,
+            "unknown": 0.014067131094634533
+          }
+        },
+        "research": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.018797114491462708,
+            "addressing": 0.01673205755650997,
+            "satisfied": 0.09057669341564178,
+            "inapplicable": 0.8590407967567444,
+            "unknown": 0.014853287488222122
+          }
+        },
+        "topology": {
+          "state": "satisfied",
+          "probabilities": {
+            "needed": 0.04339880123734474,
+            "addressing": 0.08504044264554977,
+            "satisfied": 0.6730682849884033,
+            "inapplicable": 0.17188146710395813,
+            "unknown": 0.026611074805259705
+          }
+        },
+        "halt": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.020126502960920334,
+            "addressing": 0.027117956429719925,
+            "satisfied": 0.07520448416471481,
+            "inapplicable": 0.8607107996940613,
+            "unknown": 0.016840314492583275
+          }
+        },
+        "scope": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.010977360419929028,
+            "addressing": 0.026612820103764534,
+            "satisfied": 0.20863130688667297,
+            "inapplicable": 0.7433280348777771,
+            "unknown": 0.01045040413737297
+          }
+        },
+        "modeling": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.015460195951163769,
+            "addressing": 0.01829536259174347,
+            "satisfied": 0.12383896112442017,
+            "inapplicable": 0.8263599276542664,
+            "unknown": 0.01604544185101986
+          }
+        },
+        "surgical": {
+          "state": "unknown",
+          "probabilities": {
+            "needed": 0.018403859809041023,
+            "addressing": 0.04151572287082672,
+            "satisfied": 0.4317135512828827,
+            "inapplicable": 0.4920337200164795,
+            "unknown": 0.016333239153027534
+          }
+        },
+        "control_flow": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.014967842027544975,
+            "addressing": 0.01635679416358471,
+            "satisfied": 0.09987734258174896,
+            "inapplicable": 0.8535807728767395,
+            "unknown": 0.01521721389144659
+          }
+        },
+        "cqs": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.011505309492349625,
+            "addressing": 0.021458618342876434,
+            "satisfied": 0.07027600705623627,
+            "inapplicable": 0.8799102902412415,
+            "unknown": 0.01684974692761898
+          }
+        },
+        "diagnostics": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.022337656468153,
+            "addressing": 0.03397735208272934,
+            "satisfied": 0.04804972931742668,
+            "inapplicable": 0.8733590245246887,
+            "unknown": 0.022276176139712334
+          }
+        },
+        "systems": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.019975893199443817,
+            "addressing": 0.0481235645711422,
+            "satisfied": 0.12550783157348633,
+            "inapplicable": 0.789580225944519,
+            "unknown": 0.016812503337860107
+          }
+        },
+        "concurrency": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.015162710100412369,
+            "addressing": 0.021948102861642838,
+            "satisfied": 0.04606664180755615,
+            "inapplicable": 0.8980713486671448,
+            "unknown": 0.01875116303563118
+          }
+        },
+        "input_boundary": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.019987618550658226,
+            "addressing": 0.023297933861613274,
+            "satisfied": 0.04660028964281082,
+            "inapplicable": 0.8904829025268555,
+            "unknown": 0.019631292670965195
+          }
+        },
+        "compatibility": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.015272678807377815,
+            "addressing": 0.01865403540432453,
+            "satisfied": 0.0453689880669117,
+            "inapplicable": 0.8986251950263977,
+            "unknown": 0.022079134359955788
+          }
+        },
+        "architecture": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.021635010838508606,
+            "addressing": 0.03577806428074837,
+            "satisfied": 0.06851132214069366,
+            "inapplicable": 0.8461652994155884,
+            "unknown": 0.027910208329558372
+          }
+        },
+        "ui": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.011687738820910454,
+            "addressing": 0.015533655881881714,
+            "satisfied": 0.021543385460972786,
+            "inapplicable": 0.9347543716430664,
+            "unknown": 0.016480812802910805
+          }
+        },
+        "no_cheat": {
+          "state": "unknown",
+          "probabilities": {
+            "needed": 0.015928640961647034,
+            "addressing": 0.03407956287264824,
+            "satisfied": 0.40572139620780945,
+            "inapplicable": 0.5319991111755371,
+            "unknown": 0.0122712766751647
+          }
+        },
+        "verify": {
+          "state": "satisfied",
+          "probabilities": {
+            "needed": 0.022166024893522263,
+            "addressing": 0.03497390076518059,
+            "satisfied": 0.8993655443191528,
+            "inapplicable": 0.031054766848683357,
+            "unknown": 0.01243983767926693
+          }
+        },
+        "two_strike": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.01646234840154648,
+            "addressing": 0.022172166034579277,
+            "satisfied": 0.13045094907283783,
+            "inapplicable": 0.8188257813453674,
+            "unknown": 0.012088783085346222
+          }
+        },
+        "delivery": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.009175777435302734,
+            "addressing": 0.06844192743301392,
+            "satisfied": 0.11749868094921112,
+            "inapplicable": 0.7898255586624146,
+            "unknown": 0.015057999640703201
+          }
+        },
+        "reporting": {
+          "state": "unknown",
+          "probabilities": {
+            "needed": 0.03496934473514557,
+            "addressing": 0.09566092491149902,
+            "satisfied": 0.536439061164856,
+            "inapplicable": 0.2389695942401886,
+            "unknown": 0.09396101534366608
+          }
+        },
+        "candor": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.041844286024570465,
+            "addressing": 0.06309856474399567,
+            "satisfied": 0.08259663730859756,
+            "inapplicable": 0.7873932123184204,
+            "unknown": 0.025067323818802834
+          }
+        }
+      },
+      "reasons": {
+        "context": {
+          "kind": "state"
+        },
+        "navigation": {
+          "kind": "state"
+        },
+        "research": {
+          "kind": "state"
+        },
+        "topology": {
+          "kind": "state"
+        },
+        "halt": {
+          "kind": "state"
+        },
+        "scope": {
+          "kind": "state"
+        },
+        "modeling": {
+          "kind": "state"
+        },
+        "surgical": {
+          "kind": "state"
+        },
+        "control_flow": {
+          "kind": "state"
+        },
+        "cqs": {
+          "kind": "state"
+        },
+        "diagnostics": {
+          "kind": "state"
+        },
+        "systems": {
+          "kind": "state"
+        },
+        "concurrency": {
+          "kind": "state"
+        },
+        "input_boundary": {
+          "kind": "state"
+        },
+        "compatibility": {
+          "kind": "state"
+        },
+        "architecture": {
+          "kind": "state"
+        },
+        "ui": {
+          "kind": "state"
+        },
+        "no_cheat": {
+          "kind": "state"
+        },
+        "verify": {
+          "kind": "state"
+        },
+        "two_strike": {
+          "kind": "state"
+        },
+        "delivery": {
+          "kind": "state"
+        },
+        "reporting": {
+          "kind": "state"
+        },
+        "candor": {
+          "kind": "state"
+        }
+      },
+      "activeRelations": [],
+      "probabilities": {
+        "context": {
+          "needed": 0.01982734724879265,
+          "addressing": 0.0691690742969513,
+          "satisfied": 0.7427219152450562,
+          "inapplicable": 0.15691342949867249,
+          "unknown": 0.011368234641849995
+        },
+        "navigation": {
+          "needed": 0.015347115695476532,
+          "addressing": 0.05960986763238907,
+          "satisfied": 0.22795751690864563,
+          "inapplicable": 0.6830183863639832,
+          "unknown": 0.014067131094634533
+        },
+        "research": {
+          "needed": 0.018797114491462708,
+          "addressing": 0.01673205755650997,
+          "satisfied": 0.09057669341564178,
+          "inapplicable": 0.8590407967567444,
+          "unknown": 0.014853287488222122
+        },
+        "topology": {
+          "needed": 0.04339880123734474,
+          "addressing": 0.08504044264554977,
+          "satisfied": 0.6730682849884033,
+          "inapplicable": 0.17188146710395813,
+          "unknown": 0.026611074805259705
+        },
+        "halt": {
+          "needed": 0.020126502960920334,
+          "addressing": 0.027117956429719925,
+          "satisfied": 0.07520448416471481,
+          "inapplicable": 0.8607107996940613,
+          "unknown": 0.016840314492583275
+        },
+        "scope": {
+          "needed": 0.010977360419929028,
+          "addressing": 0.026612820103764534,
+          "satisfied": 0.20863130688667297,
+          "inapplicable": 0.7433280348777771,
+          "unknown": 0.01045040413737297
+        },
+        "modeling": {
+          "needed": 0.015460195951163769,
+          "addressing": 0.01829536259174347,
+          "satisfied": 0.12383896112442017,
+          "inapplicable": 0.8263599276542664,
+          "unknown": 0.01604544185101986
+        },
+        "surgical": {
+          "needed": 0.018403859809041023,
+          "addressing": 0.04151572287082672,
+          "satisfied": 0.4317135512828827,
+          "inapplicable": 0.4920337200164795,
+          "unknown": 0.016333239153027534
+        },
+        "control_flow": {
+          "needed": 0.014967842027544975,
+          "addressing": 0.01635679416358471,
+          "satisfied": 0.09987734258174896,
+          "inapplicable": 0.8535807728767395,
+          "unknown": 0.01521721389144659
+        },
+        "cqs": {
+          "needed": 0.011505309492349625,
+          "addressing": 0.021458618342876434,
+          "satisfied": 0.07027600705623627,
+          "inapplicable": 0.8799102902412415,
+          "unknown": 0.01684974692761898
+        },
+        "diagnostics": {
+          "needed": 0.022337656468153,
+          "addressing": 0.03397735208272934,
+          "satisfied": 0.04804972931742668,
+          "inapplicable": 0.8733590245246887,
+          "unknown": 0.022276176139712334
+        },
+        "systems": {
+          "needed": 0.019975893199443817,
+          "addressing": 0.0481235645711422,
+          "satisfied": 0.12550783157348633,
+          "inapplicable": 0.789580225944519,
+          "unknown": 0.016812503337860107
+        },
+        "concurrency": {
+          "needed": 0.015162710100412369,
+          "addressing": 0.021948102861642838,
+          "satisfied": 0.04606664180755615,
+          "inapplicable": 0.8980713486671448,
+          "unknown": 0.01875116303563118
+        },
+        "input_boundary": {
+          "needed": 0.019987618550658226,
+          "addressing": 0.023297933861613274,
+          "satisfied": 0.04660028964281082,
+          "inapplicable": 0.8904829025268555,
+          "unknown": 0.019631292670965195
+        },
+        "compatibility": {
+          "needed": 0.015272678807377815,
+          "addressing": 0.01865403540432453,
+          "satisfied": 0.0453689880669117,
+          "inapplicable": 0.8986251950263977,
+          "unknown": 0.022079134359955788
+        },
+        "architecture": {
+          "needed": 0.021635010838508606,
+          "addressing": 0.03577806428074837,
+          "satisfied": 0.06851132214069366,
+          "inapplicable": 0.8461652994155884,
+          "unknown": 0.027910208329558372
+        },
+        "ui": {
+          "needed": 0.011687738820910454,
+          "addressing": 0.015533655881881714,
+          "satisfied": 0.021543385460972786,
+          "inapplicable": 0.9347543716430664,
+          "unknown": 0.016480812802910805
+        },
+        "no_cheat": {
+          "needed": 0.015928640961647034,
+          "addressing": 0.03407956287264824,
+          "satisfied": 0.40572139620780945,
+          "inapplicable": 0.5319991111755371,
+          "unknown": 0.0122712766751647
+        },
+        "verify": {
+          "needed": 0.022166024893522263,
+          "addressing": 0.03497390076518059,
+          "satisfied": 0.8993655443191528,
+          "inapplicable": 0.031054766848683357,
+          "unknown": 0.01243983767926693
+        },
+        "two_strike": {
+          "needed": 0.01646234840154648,
+          "addressing": 0.022172166034579277,
+          "satisfied": 0.13045094907283783,
+          "inapplicable": 0.8188257813453674,
+          "unknown": 0.012088783085346222
+        },
+        "delivery": {
+          "needed": 0.009175777435302734,
+          "addressing": 0.06844192743301392,
+          "satisfied": 0.11749868094921112,
+          "inapplicable": 0.7898255586624146,
+          "unknown": 0.015057999640703201
+        },
+        "reporting": {
+          "needed": 0.03496934473514557,
+          "addressing": 0.09566092491149902,
+          "satisfied": 0.536439061164856,
+          "inapplicable": 0.2389695942401886,
+          "unknown": 0.09396101534366608
+        },
+        "candor": {
+          "needed": 0.041844286024570465,
+          "addressing": 0.06309856474399567,
+          "satisfied": 0.08259663730859756,
+          "inapplicable": 0.7873932123184204,
+          "unknown": 0.025067323818802834
+        },
+        "relation_verification_covers_completion": {
+          "applies": 0.14332224428653717,
+          "independent": 0.7867245674133301,
+          "unknown": 0.06995321065187454
+        },
+        "relation_verification_covers_report": {
+          "applies": 0.44109800457954407,
+          "independent": 0.4133013188838959,
+          "unknown": 0.14560066163539886
+        },
+        "relation_repeated_fix_covers_cause": {
+          "applies": 0.03738244250416756,
+          "independent": 0.8916011452674866,
+          "unknown": 0.07101644575595856
+        },
+        "relation_decision_blocks_continuation": {
+          "applies": 0.03263812139630318,
+          "independent": 0.9093122482299805,
+          "unknown": 0.05804966762661934
+        },
+        "relation_contract_before_acceptance": {
+          "applies": 0.02206224575638771,
+          "independent": 0.9243807196617126,
+          "unknown": 0.05355711653828621
+        }
+      },
+      "batchCount": 2,
+      "questionCount": 28,
+      "reusedDecisions": true,
+      "latencyMs": 3173
+    },
+    {
+      "arm": "candidate",
+      "case": "recorded_conflict_asking",
+      "comparable": true,
+      "pass": true,
+      "selected": [],
+      "cardIds": [],
+      "assessments": {
+        "context": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.08352461457252502,
+            "addressing": 0.08015518635511398,
+            "satisfied": 0.09430170059204102,
+            "inapplicable": 0.7120177745819092,
+            "unknown": 0.030000746250152588
+          }
+        },
+        "navigation": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.020213695243000984,
+            "addressing": 0.07387491315603256,
+            "satisfied": 0.21225906908512115,
+            "inapplicable": 0.6734240651130676,
+            "unknown": 0.020228218287229538
+          }
+        },
+        "research": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.05991589277982712,
+            "addressing": 0.03748364374041557,
+            "satisfied": 0.03011079877614975,
+            "inapplicable": 0.8347333073616028,
+            "unknown": 0.037756383419036865
+          }
+        },
+        "topology": {
+          "state": "unknown",
+          "probabilities": {
+            "needed": 0.048874638974666595,
+            "addressing": 0.08401066064834595,
+            "satisfied": 0.5543107390403748,
+            "inapplicable": 0.27857506275177,
+            "unknown": 0.0342288538813591
+          }
+        },
+        "halt": {
+          "state": "unknown",
+          "probabilities": {
+            "needed": 0.4194471836090088,
+            "addressing": 0.45064103603363037,
+            "satisfied": 0.039906177669763565,
+            "inapplicable": 0.07415363192558289,
+            "unknown": 0.0158519484102726
+          }
+        },
+        "scope": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.032634519040584564,
+            "addressing": 0.0609092190861702,
+            "satisfied": 0.031139064580202103,
+            "inapplicable": 0.8457500338554382,
+            "unknown": 0.029567189514636993
+          }
+        },
+        "modeling": {
+          "state": "unknown",
+          "probabilities": {
+            "needed": 0.3583996891975403,
+            "addressing": 0.19390937685966492,
+            "satisfied": 0.034857600927352905,
+            "inapplicable": 0.37570568919181824,
+            "unknown": 0.037127669900655746
+          }
+        },
+        "surgical": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.11297476291656494,
+            "addressing": 0.10541428625583649,
+            "satisfied": 0.02628016099333763,
+            "inapplicable": 0.6522008776664734,
+            "unknown": 0.1031298041343689
+          }
+        },
+        "control_flow": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.04710451140999794,
+            "addressing": 0.03367772325873375,
+            "satisfied": 0.023031551390886307,
+            "inapplicable": 0.8225862383842468,
+            "unknown": 0.07359996438026428
+          }
+        },
+        "cqs": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.0287576075643301,
+            "addressing": 0.042495109140872955,
+            "satisfied": 0.02773793414235115,
+            "inapplicable": 0.8537381887435913,
+            "unknown": 0.04727114737033844
+          }
+        },
+        "diagnostics": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.049504734575748444,
+            "addressing": 0.04648207128047943,
+            "satisfied": 0.020061209797859192,
+            "inapplicable": 0.8205583095550537,
+            "unknown": 0.06339359283447266
+          }
+        },
+        "systems": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.0233017448335886,
+            "addressing": 0.045488353818655014,
+            "satisfied": 0.02207096852362156,
+            "inapplicable": 0.873258113861084,
+            "unknown": 0.03588083013892174
+          }
+        },
+        "concurrency": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.02396269142627716,
+            "addressing": 0.03515210375189781,
+            "satisfied": 0.017620569095015526,
+            "inapplicable": 0.880928099155426,
+            "unknown": 0.04233647882938385
+          }
+        },
+        "input_boundary": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.024795658886432648,
+            "addressing": 0.023865660652518272,
+            "satisfied": 0.015486480668187141,
+            "inapplicable": 0.8994570374488831,
+            "unknown": 0.03639509156346321
+          }
+        },
+        "compatibility": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.03558268025517464,
+            "addressing": 0.029997358098626137,
+            "satisfied": 0.01557243149727583,
+            "inapplicable": 0.8612348437309265,
+            "unknown": 0.05761270225048065
+          }
+        },
+        "architecture": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.06034613773226738,
+            "addressing": 0.05957572162151337,
+            "satisfied": 0.01964113488793373,
+            "inapplicable": 0.7946187257766724,
+            "unknown": 0.06581821292638779
+          }
+        },
+        "ui": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.013492466881871223,
+            "addressing": 0.015063048340380192,
+            "satisfied": 0.009889042936265469,
+            "inapplicable": 0.9378601908683777,
+            "unknown": 0.023695196956396103
+          }
+        },
+        "no_cheat": {
+          "state": "unknown",
+          "probabilities": {
+            "needed": 0.3140075206756592,
+            "addressing": 0.5366625189781189,
+            "satisfied": 0.03827459737658501,
+            "inapplicable": 0.08098761737346649,
+            "unknown": 0.030067728832364082
+          }
+        },
+        "verify": {
+          "state": "unknown",
+          "probabilities": {
+            "needed": 0.06836312264204025,
+            "addressing": 0.3761187493801117,
+            "satisfied": 0.017301972955465317,
+            "inapplicable": 0.4927188754081726,
+            "unknown": 0.045497290790081024
+          }
+        },
+        "two_strike": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.041485607624053955,
+            "addressing": 0.04900699481368065,
+            "satisfied": 0.01777053065598011,
+            "inapplicable": 0.8431761860847473,
+            "unknown": 0.04856069013476372
+          }
+        },
+        "delivery": {
+          "state": "unknown",
+          "probabilities": {
+            "needed": 0.08063506335020065,
+            "addressing": 0.31018006801605225,
+            "satisfied": 0.04057737812399864,
+            "inapplicable": 0.5133129358291626,
+            "unknown": 0.05529465153813362
+          }
+        },
+        "reporting": {
+          "state": "unknown",
+          "probabilities": {
+            "needed": 0.054553646594285965,
+            "addressing": 0.11944431066513062,
+            "satisfied": 0.18488432466983795,
+            "inapplicable": 0.5587342977523804,
+            "unknown": 0.08238344639539719
+          }
+        },
+        "candor": {
+          "state": "unknown",
+          "probabilities": {
+            "needed": 0.09612312912940979,
+            "addressing": 0.12471530586481094,
+            "satisfied": 0.14443984627723694,
+            "inapplicable": 0.5987704992294312,
+            "unknown": 0.03595124930143356
+          }
+        }
+      },
+      "reasons": {
+        "context": {
+          "kind": "state"
+        },
+        "navigation": {
+          "kind": "state"
+        },
+        "research": {
+          "kind": "state"
+        },
+        "topology": {
+          "kind": "state"
+        },
+        "halt": {
+          "kind": "state"
+        },
+        "scope": {
+          "kind": "state"
+        },
+        "modeling": {
+          "kind": "state"
+        },
+        "surgical": {
+          "kind": "state"
+        },
+        "control_flow": {
+          "kind": "state"
+        },
+        "cqs": {
+          "kind": "state"
+        },
+        "diagnostics": {
+          "kind": "state"
+        },
+        "systems": {
+          "kind": "state"
+        },
+        "concurrency": {
+          "kind": "state"
+        },
+        "input_boundary": {
+          "kind": "state"
+        },
+        "compatibility": {
+          "kind": "state"
+        },
+        "architecture": {
+          "kind": "state"
+        },
+        "ui": {
+          "kind": "state"
+        },
+        "no_cheat": {
+          "kind": "state"
+        },
+        "verify": {
+          "kind": "state"
+        },
+        "two_strike": {
+          "kind": "state"
+        },
+        "delivery": {
+          "kind": "state"
+        },
+        "reporting": {
+          "kind": "state"
+        },
+        "candor": {
+          "kind": "state"
+        }
+      },
+      "activeRelations": [
+        "decision_blocks_continuation",
+        "contract_before_acceptance"
+      ],
+      "probabilities": {
+        "context": {
+          "needed": 0.08352461457252502,
+          "addressing": 0.08015518635511398,
+          "satisfied": 0.09430170059204102,
+          "inapplicable": 0.7120177745819092,
+          "unknown": 0.030000746250152588
+        },
+        "navigation": {
+          "needed": 0.020213695243000984,
+          "addressing": 0.07387491315603256,
+          "satisfied": 0.21225906908512115,
+          "inapplicable": 0.6734240651130676,
+          "unknown": 0.020228218287229538
+        },
+        "research": {
+          "needed": 0.05991589277982712,
+          "addressing": 0.03748364374041557,
+          "satisfied": 0.03011079877614975,
+          "inapplicable": 0.8347333073616028,
+          "unknown": 0.037756383419036865
+        },
+        "topology": {
+          "needed": 0.048874638974666595,
+          "addressing": 0.08401066064834595,
+          "satisfied": 0.5543107390403748,
+          "inapplicable": 0.27857506275177,
+          "unknown": 0.0342288538813591
+        },
+        "halt": {
+          "needed": 0.4194471836090088,
+          "addressing": 0.45064103603363037,
+          "satisfied": 0.039906177669763565,
+          "inapplicable": 0.07415363192558289,
+          "unknown": 0.0158519484102726
+        },
+        "scope": {
+          "needed": 0.032634519040584564,
+          "addressing": 0.0609092190861702,
+          "satisfied": 0.031139064580202103,
+          "inapplicable": 0.8457500338554382,
+          "unknown": 0.029567189514636993
+        },
+        "modeling": {
+          "needed": 0.3583996891975403,
+          "addressing": 0.19390937685966492,
+          "satisfied": 0.034857600927352905,
+          "inapplicable": 0.37570568919181824,
+          "unknown": 0.037127669900655746
+        },
+        "surgical": {
+          "needed": 0.11297476291656494,
+          "addressing": 0.10541428625583649,
+          "satisfied": 0.02628016099333763,
+          "inapplicable": 0.6522008776664734,
+          "unknown": 0.1031298041343689
+        },
+        "control_flow": {
+          "needed": 0.04710451140999794,
+          "addressing": 0.03367772325873375,
+          "satisfied": 0.023031551390886307,
+          "inapplicable": 0.8225862383842468,
+          "unknown": 0.07359996438026428
+        },
+        "cqs": {
+          "needed": 0.0287576075643301,
+          "addressing": 0.042495109140872955,
+          "satisfied": 0.02773793414235115,
+          "inapplicable": 0.8537381887435913,
+          "unknown": 0.04727114737033844
+        },
+        "diagnostics": {
+          "needed": 0.049504734575748444,
+          "addressing": 0.04648207128047943,
+          "satisfied": 0.020061209797859192,
+          "inapplicable": 0.8205583095550537,
+          "unknown": 0.06339359283447266
+        },
+        "systems": {
+          "needed": 0.0233017448335886,
+          "addressing": 0.045488353818655014,
+          "satisfied": 0.02207096852362156,
+          "inapplicable": 0.873258113861084,
+          "unknown": 0.03588083013892174
+        },
+        "concurrency": {
+          "needed": 0.02396269142627716,
+          "addressing": 0.03515210375189781,
+          "satisfied": 0.017620569095015526,
+          "inapplicable": 0.880928099155426,
+          "unknown": 0.04233647882938385
+        },
+        "input_boundary": {
+          "needed": 0.024795658886432648,
+          "addressing": 0.023865660652518272,
+          "satisfied": 0.015486480668187141,
+          "inapplicable": 0.8994570374488831,
+          "unknown": 0.03639509156346321
+        },
+        "compatibility": {
+          "needed": 0.03558268025517464,
+          "addressing": 0.029997358098626137,
+          "satisfied": 0.01557243149727583,
+          "inapplicable": 0.8612348437309265,
+          "unknown": 0.05761270225048065
+        },
+        "architecture": {
+          "needed": 0.06034613773226738,
+          "addressing": 0.05957572162151337,
+          "satisfied": 0.01964113488793373,
+          "inapplicable": 0.7946187257766724,
+          "unknown": 0.06581821292638779
+        },
+        "ui": {
+          "needed": 0.013492466881871223,
+          "addressing": 0.015063048340380192,
+          "satisfied": 0.009889042936265469,
+          "inapplicable": 0.9378601908683777,
+          "unknown": 0.023695196956396103
+        },
+        "no_cheat": {
+          "needed": 0.3140075206756592,
+          "addressing": 0.5366625189781189,
+          "satisfied": 0.03827459737658501,
+          "inapplicable": 0.08098761737346649,
+          "unknown": 0.030067728832364082
+        },
+        "verify": {
+          "needed": 0.06836312264204025,
+          "addressing": 0.3761187493801117,
+          "satisfied": 0.017301972955465317,
+          "inapplicable": 0.4927188754081726,
+          "unknown": 0.045497290790081024
+        },
+        "two_strike": {
+          "needed": 0.041485607624053955,
+          "addressing": 0.04900699481368065,
+          "satisfied": 0.01777053065598011,
+          "inapplicable": 0.8431761860847473,
+          "unknown": 0.04856069013476372
+        },
+        "delivery": {
+          "needed": 0.08063506335020065,
+          "addressing": 0.31018006801605225,
+          "satisfied": 0.04057737812399864,
+          "inapplicable": 0.5133129358291626,
+          "unknown": 0.05529465153813362
+        },
+        "reporting": {
+          "needed": 0.054553646594285965,
+          "addressing": 0.11944431066513062,
+          "satisfied": 0.18488432466983795,
+          "inapplicable": 0.5587342977523804,
+          "unknown": 0.08238344639539719
+        },
+        "candor": {
+          "needed": 0.09612312912940979,
+          "addressing": 0.12471530586481094,
+          "satisfied": 0.14443984627723694,
+          "inapplicable": 0.5987704992294312,
+          "unknown": 0.03595124930143356
+        },
+        "relation_verification_covers_completion": {
+          "applies": 0.0984954759478569,
+          "independent": 0.8049987554550171,
+          "unknown": 0.09650569409132004
+        },
+        "relation_verification_covers_report": {
+          "applies": 0.11246591061353683,
+          "independent": 0.7595399618148804,
+          "unknown": 0.12799414992332458
+        },
+        "relation_repeated_fix_covers_cause": {
+          "applies": 0.0444122739136219,
+          "independent": 0.8867753148078918,
+          "unknown": 0.06881240010261536
+        },
+        "relation_decision_blocks_continuation": {
+          "applies": 0.8178445100784302,
+          "independent": 0.1239229217171669,
+          "unknown": 0.05823257938027382
+        },
+        "relation_contract_before_acceptance": {
+          "applies": 0.825664222240448,
+          "independent": 0.11007197201251984,
+          "unknown": 0.06426389515399933
+        }
+      },
+      "batchCount": 2,
+      "questionCount": 28,
+      "reusedDecisions": false,
+      "latencyMs": 1246
+    },
+    {
+      "arm": "candidate-flat",
+      "case": "recorded_conflict_asking",
+      "comparable": true,
+      "pass": true,
+      "selected": [],
+      "cardIds": [],
+      "assessments": {
+        "context": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.08352461457252502,
+            "addressing": 0.08015518635511398,
+            "satisfied": 0.09430170059204102,
+            "inapplicable": 0.7120177745819092,
+            "unknown": 0.030000746250152588
+          }
+        },
+        "navigation": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.020213695243000984,
+            "addressing": 0.07387491315603256,
+            "satisfied": 0.21225906908512115,
+            "inapplicable": 0.6734240651130676,
+            "unknown": 0.020228218287229538
+          }
+        },
+        "research": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.05991589277982712,
+            "addressing": 0.03748364374041557,
+            "satisfied": 0.03011079877614975,
+            "inapplicable": 0.8347333073616028,
+            "unknown": 0.037756383419036865
+          }
+        },
+        "topology": {
+          "state": "unknown",
+          "probabilities": {
+            "needed": 0.048874638974666595,
+            "addressing": 0.08401066064834595,
+            "satisfied": 0.5543107390403748,
+            "inapplicable": 0.27857506275177,
+            "unknown": 0.0342288538813591
+          }
+        },
+        "halt": {
+          "state": "unknown",
+          "probabilities": {
+            "needed": 0.4194471836090088,
+            "addressing": 0.45064103603363037,
+            "satisfied": 0.039906177669763565,
+            "inapplicable": 0.07415363192558289,
+            "unknown": 0.0158519484102726
+          }
+        },
+        "scope": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.032634519040584564,
+            "addressing": 0.0609092190861702,
+            "satisfied": 0.031139064580202103,
+            "inapplicable": 0.8457500338554382,
+            "unknown": 0.029567189514636993
+          }
+        },
+        "modeling": {
+          "state": "unknown",
+          "probabilities": {
+            "needed": 0.3583996891975403,
+            "addressing": 0.19390937685966492,
+            "satisfied": 0.034857600927352905,
+            "inapplicable": 0.37570568919181824,
+            "unknown": 0.037127669900655746
+          }
+        },
+        "surgical": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.11297476291656494,
+            "addressing": 0.10541428625583649,
+            "satisfied": 0.02628016099333763,
+            "inapplicable": 0.6522008776664734,
+            "unknown": 0.1031298041343689
+          }
+        },
+        "control_flow": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.04710451140999794,
+            "addressing": 0.03367772325873375,
+            "satisfied": 0.023031551390886307,
+            "inapplicable": 0.8225862383842468,
+            "unknown": 0.07359996438026428
+          }
+        },
+        "cqs": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.0287576075643301,
+            "addressing": 0.042495109140872955,
+            "satisfied": 0.02773793414235115,
+            "inapplicable": 0.8537381887435913,
+            "unknown": 0.04727114737033844
+          }
+        },
+        "diagnostics": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.049504734575748444,
+            "addressing": 0.04648207128047943,
+            "satisfied": 0.020061209797859192,
+            "inapplicable": 0.8205583095550537,
+            "unknown": 0.06339359283447266
+          }
+        },
+        "systems": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.0233017448335886,
+            "addressing": 0.045488353818655014,
+            "satisfied": 0.02207096852362156,
+            "inapplicable": 0.873258113861084,
+            "unknown": 0.03588083013892174
+          }
+        },
+        "concurrency": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.02396269142627716,
+            "addressing": 0.03515210375189781,
+            "satisfied": 0.017620569095015526,
+            "inapplicable": 0.880928099155426,
+            "unknown": 0.04233647882938385
+          }
+        },
+        "input_boundary": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.024795658886432648,
+            "addressing": 0.023865660652518272,
+            "satisfied": 0.015486480668187141,
+            "inapplicable": 0.8994570374488831,
+            "unknown": 0.03639509156346321
+          }
+        },
+        "compatibility": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.03558268025517464,
+            "addressing": 0.029997358098626137,
+            "satisfied": 0.01557243149727583,
+            "inapplicable": 0.8612348437309265,
+            "unknown": 0.05761270225048065
+          }
+        },
+        "architecture": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.06034613773226738,
+            "addressing": 0.05957572162151337,
+            "satisfied": 0.01964113488793373,
+            "inapplicable": 0.7946187257766724,
+            "unknown": 0.06581821292638779
+          }
+        },
+        "ui": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.013492466881871223,
+            "addressing": 0.015063048340380192,
+            "satisfied": 0.009889042936265469,
+            "inapplicable": 0.9378601908683777,
+            "unknown": 0.023695196956396103
+          }
+        },
+        "no_cheat": {
+          "state": "unknown",
+          "probabilities": {
+            "needed": 0.3140075206756592,
+            "addressing": 0.5366625189781189,
+            "satisfied": 0.03827459737658501,
+            "inapplicable": 0.08098761737346649,
+            "unknown": 0.030067728832364082
+          }
+        },
+        "verify": {
+          "state": "unknown",
+          "probabilities": {
+            "needed": 0.06836312264204025,
+            "addressing": 0.3761187493801117,
+            "satisfied": 0.017301972955465317,
+            "inapplicable": 0.4927188754081726,
+            "unknown": 0.045497290790081024
+          }
+        },
+        "two_strike": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.041485607624053955,
+            "addressing": 0.04900699481368065,
+            "satisfied": 0.01777053065598011,
+            "inapplicable": 0.8431761860847473,
+            "unknown": 0.04856069013476372
+          }
+        },
+        "delivery": {
+          "state": "unknown",
+          "probabilities": {
+            "needed": 0.08063506335020065,
+            "addressing": 0.31018006801605225,
+            "satisfied": 0.04057737812399864,
+            "inapplicable": 0.5133129358291626,
+            "unknown": 0.05529465153813362
+          }
+        },
+        "reporting": {
+          "state": "unknown",
+          "probabilities": {
+            "needed": 0.054553646594285965,
+            "addressing": 0.11944431066513062,
+            "satisfied": 0.18488432466983795,
+            "inapplicable": 0.5587342977523804,
+            "unknown": 0.08238344639539719
+          }
+        },
+        "candor": {
+          "state": "unknown",
+          "probabilities": {
+            "needed": 0.09612312912940979,
+            "addressing": 0.12471530586481094,
+            "satisfied": 0.14443984627723694,
+            "inapplicable": 0.5987704992294312,
+            "unknown": 0.03595124930143356
+          }
+        }
+      },
+      "reasons": {
+        "context": {
+          "kind": "state"
+        },
+        "navigation": {
+          "kind": "state"
+        },
+        "research": {
+          "kind": "state"
+        },
+        "topology": {
+          "kind": "state"
+        },
+        "halt": {
+          "kind": "state"
+        },
+        "scope": {
+          "kind": "state"
+        },
+        "modeling": {
+          "kind": "state"
+        },
+        "surgical": {
+          "kind": "state"
+        },
+        "control_flow": {
+          "kind": "state"
+        },
+        "cqs": {
+          "kind": "state"
+        },
+        "diagnostics": {
+          "kind": "state"
+        },
+        "systems": {
+          "kind": "state"
+        },
+        "concurrency": {
+          "kind": "state"
+        },
+        "input_boundary": {
+          "kind": "state"
+        },
+        "compatibility": {
+          "kind": "state"
+        },
+        "architecture": {
+          "kind": "state"
+        },
+        "ui": {
+          "kind": "state"
+        },
+        "no_cheat": {
+          "kind": "state"
+        },
+        "verify": {
+          "kind": "state"
+        },
+        "two_strike": {
+          "kind": "state"
+        },
+        "delivery": {
+          "kind": "state"
+        },
+        "reporting": {
+          "kind": "state"
+        },
+        "candor": {
+          "kind": "state"
+        }
+      },
+      "activeRelations": [],
+      "probabilities": {
+        "context": {
+          "needed": 0.08352461457252502,
+          "addressing": 0.08015518635511398,
+          "satisfied": 0.09430170059204102,
+          "inapplicable": 0.7120177745819092,
+          "unknown": 0.030000746250152588
+        },
+        "navigation": {
+          "needed": 0.020213695243000984,
+          "addressing": 0.07387491315603256,
+          "satisfied": 0.21225906908512115,
+          "inapplicable": 0.6734240651130676,
+          "unknown": 0.020228218287229538
+        },
+        "research": {
+          "needed": 0.05991589277982712,
+          "addressing": 0.03748364374041557,
+          "satisfied": 0.03011079877614975,
+          "inapplicable": 0.8347333073616028,
+          "unknown": 0.037756383419036865
+        },
+        "topology": {
+          "needed": 0.048874638974666595,
+          "addressing": 0.08401066064834595,
+          "satisfied": 0.5543107390403748,
+          "inapplicable": 0.27857506275177,
+          "unknown": 0.0342288538813591
+        },
+        "halt": {
+          "needed": 0.4194471836090088,
+          "addressing": 0.45064103603363037,
+          "satisfied": 0.039906177669763565,
+          "inapplicable": 0.07415363192558289,
+          "unknown": 0.0158519484102726
+        },
+        "scope": {
+          "needed": 0.032634519040584564,
+          "addressing": 0.0609092190861702,
+          "satisfied": 0.031139064580202103,
+          "inapplicable": 0.8457500338554382,
+          "unknown": 0.029567189514636993
+        },
+        "modeling": {
+          "needed": 0.3583996891975403,
+          "addressing": 0.19390937685966492,
+          "satisfied": 0.034857600927352905,
+          "inapplicable": 0.37570568919181824,
+          "unknown": 0.037127669900655746
+        },
+        "surgical": {
+          "needed": 0.11297476291656494,
+          "addressing": 0.10541428625583649,
+          "satisfied": 0.02628016099333763,
+          "inapplicable": 0.6522008776664734,
+          "unknown": 0.1031298041343689
+        },
+        "control_flow": {
+          "needed": 0.04710451140999794,
+          "addressing": 0.03367772325873375,
+          "satisfied": 0.023031551390886307,
+          "inapplicable": 0.8225862383842468,
+          "unknown": 0.07359996438026428
+        },
+        "cqs": {
+          "needed": 0.0287576075643301,
+          "addressing": 0.042495109140872955,
+          "satisfied": 0.02773793414235115,
+          "inapplicable": 0.8537381887435913,
+          "unknown": 0.04727114737033844
+        },
+        "diagnostics": {
+          "needed": 0.049504734575748444,
+          "addressing": 0.04648207128047943,
+          "satisfied": 0.020061209797859192,
+          "inapplicable": 0.8205583095550537,
+          "unknown": 0.06339359283447266
+        },
+        "systems": {
+          "needed": 0.0233017448335886,
+          "addressing": 0.045488353818655014,
+          "satisfied": 0.02207096852362156,
+          "inapplicable": 0.873258113861084,
+          "unknown": 0.03588083013892174
+        },
+        "concurrency": {
+          "needed": 0.02396269142627716,
+          "addressing": 0.03515210375189781,
+          "satisfied": 0.017620569095015526,
+          "inapplicable": 0.880928099155426,
+          "unknown": 0.04233647882938385
+        },
+        "input_boundary": {
+          "needed": 0.024795658886432648,
+          "addressing": 0.023865660652518272,
+          "satisfied": 0.015486480668187141,
+          "inapplicable": 0.8994570374488831,
+          "unknown": 0.03639509156346321
+        },
+        "compatibility": {
+          "needed": 0.03558268025517464,
+          "addressing": 0.029997358098626137,
+          "satisfied": 0.01557243149727583,
+          "inapplicable": 0.8612348437309265,
+          "unknown": 0.05761270225048065
+        },
+        "architecture": {
+          "needed": 0.06034613773226738,
+          "addressing": 0.05957572162151337,
+          "satisfied": 0.01964113488793373,
+          "inapplicable": 0.7946187257766724,
+          "unknown": 0.06581821292638779
+        },
+        "ui": {
+          "needed": 0.013492466881871223,
+          "addressing": 0.015063048340380192,
+          "satisfied": 0.009889042936265469,
+          "inapplicable": 0.9378601908683777,
+          "unknown": 0.023695196956396103
+        },
+        "no_cheat": {
+          "needed": 0.3140075206756592,
+          "addressing": 0.5366625189781189,
+          "satisfied": 0.03827459737658501,
+          "inapplicable": 0.08098761737346649,
+          "unknown": 0.030067728832364082
+        },
+        "verify": {
+          "needed": 0.06836312264204025,
+          "addressing": 0.3761187493801117,
+          "satisfied": 0.017301972955465317,
+          "inapplicable": 0.4927188754081726,
+          "unknown": 0.045497290790081024
+        },
+        "two_strike": {
+          "needed": 0.041485607624053955,
+          "addressing": 0.04900699481368065,
+          "satisfied": 0.01777053065598011,
+          "inapplicable": 0.8431761860847473,
+          "unknown": 0.04856069013476372
+        },
+        "delivery": {
+          "needed": 0.08063506335020065,
+          "addressing": 0.31018006801605225,
+          "satisfied": 0.04057737812399864,
+          "inapplicable": 0.5133129358291626,
+          "unknown": 0.05529465153813362
+        },
+        "reporting": {
+          "needed": 0.054553646594285965,
+          "addressing": 0.11944431066513062,
+          "satisfied": 0.18488432466983795,
+          "inapplicable": 0.5587342977523804,
+          "unknown": 0.08238344639539719
+        },
+        "candor": {
+          "needed": 0.09612312912940979,
+          "addressing": 0.12471530586481094,
+          "satisfied": 0.14443984627723694,
+          "inapplicable": 0.5987704992294312,
+          "unknown": 0.03595124930143356
+        },
+        "relation_verification_covers_completion": {
+          "applies": 0.0984954759478569,
+          "independent": 0.8049987554550171,
+          "unknown": 0.09650569409132004
+        },
+        "relation_verification_covers_report": {
+          "applies": 0.11246591061353683,
+          "independent": 0.7595399618148804,
+          "unknown": 0.12799414992332458
+        },
+        "relation_repeated_fix_covers_cause": {
+          "applies": 0.0444122739136219,
+          "independent": 0.8867753148078918,
+          "unknown": 0.06881240010261536
+        },
+        "relation_decision_blocks_continuation": {
+          "applies": 0.8178445100784302,
+          "independent": 0.1239229217171669,
+          "unknown": 0.05823257938027382
+        },
+        "relation_contract_before_acceptance": {
+          "applies": 0.825664222240448,
+          "independent": 0.11007197201251984,
+          "unknown": 0.06426389515399933
+        }
+      },
+      "batchCount": 2,
+      "questionCount": 28,
+      "reusedDecisions": true,
+      "latencyMs": 1246
+    },
+    {
+      "arm": "candidate",
+      "case": "recorded_authorized_removal_verified",
+      "comparable": true,
+      "pass": true,
+      "selected": [],
+      "cardIds": [],
+      "assessments": {
+        "context": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.023824136704206467,
+            "addressing": 0.03819115832448006,
+            "satisfied": 0.28666624426841736,
+            "inapplicable": 0.6291090250015259,
+            "unknown": 0.022209396585822105
+          }
+        },
+        "navigation": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.02474859170615673,
+            "addressing": 0.08591638505458832,
+            "satisfied": 0.1829289197921753,
+            "inapplicable": 0.6751676201820374,
+            "unknown": 0.031238464638590813
+          }
+        },
+        "research": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.020269494503736496,
+            "addressing": 0.022984342649579048,
+            "satisfied": 0.050249263644218445,
+            "inapplicable": 0.8853431940078735,
+            "unknown": 0.02115374244749546
+          }
+        },
+        "topology": {
+          "state": "satisfied",
+          "probabilities": {
+            "needed": 0.0715717077255249,
+            "addressing": 0.12185083329677582,
+            "satisfied": 0.6622940897941589,
+            "inapplicable": 0.06415774673223495,
+            "unknown": 0.08012562990188599
+          }
+        },
+        "halt": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.05122964456677437,
+            "addressing": 0.05671502649784088,
+            "satisfied": 0.1306004673242569,
+            "inapplicable": 0.7160305380821228,
+            "unknown": 0.04542427510023117
+          }
+        },
+        "scope": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.016696559265255928,
+            "addressing": 0.03325755521655083,
+            "satisfied": 0.2874497175216675,
+            "inapplicable": 0.6425144076347351,
+            "unknown": 0.02008172497153282
+          }
+        },
+        "modeling": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.028210751712322235,
+            "addressing": 0.03597709536552429,
+            "satisfied": 0.17913685739040375,
+            "inapplicable": 0.7270218133926392,
+            "unknown": 0.029653478413820267
+          }
+        },
+        "surgical": {
+          "state": "unknown",
+          "probabilities": {
+            "needed": 0.35672417283058167,
+            "addressing": 0.09068822115659714,
+            "satisfied": 0.272256076335907,
+            "inapplicable": 0.11290184408426285,
+            "unknown": 0.16742973029613495
+          }
+        },
+        "control_flow": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.027191730216145515,
+            "addressing": 0.0384552888572216,
+            "satisfied": 0.12436068803071976,
+            "inapplicable": 0.7828948497772217,
+            "unknown": 0.027097372338175774
+          }
+        },
+        "cqs": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.01995549350976944,
+            "addressing": 0.0286618210375309,
+            "satisfied": 0.07373417913913727,
+            "inapplicable": 0.8443275690078735,
+            "unknown": 0.03332094848155975
+          }
+        },
+        "diagnostics": {
+          "state": "unknown",
+          "probabilities": {
+            "needed": 0.07780753076076508,
+            "addressing": 0.060984473675489426,
+            "satisfied": 0.254088431596756,
+            "inapplicable": 0.5368090271949768,
+            "unknown": 0.07031061500310898
+          }
+        },
+        "systems": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.02741347812116146,
+            "addressing": 0.04400298744440079,
+            "satisfied": 0.06302379816770554,
+            "inapplicable": 0.8330649733543396,
+            "unknown": 0.03249472752213478
+          }
+        },
+        "concurrency": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.01854512467980385,
+            "addressing": 0.026967303827404976,
+            "satisfied": 0.04463673382997513,
+            "inapplicable": 0.8790861368179321,
+            "unknown": 0.030764691531658173
+          }
+        },
+        "input_boundary": {
+          "state": "unknown",
+          "probabilities": {
+            "needed": 0.050701238214969635,
+            "addressing": 0.07105015963315964,
+            "satisfied": 0.3345679044723511,
+            "inapplicable": 0.49982523918151855,
+            "unknown": 0.043855465948581696
+          }
+        },
+        "compatibility": {
+          "state": "unknown",
+          "probabilities": {
+            "needed": 0.09151198714971542,
+            "addressing": 0.07378117740154266,
+            "satisfied": 0.5289783477783203,
+            "inapplicable": 0.22848355770111084,
+            "unknown": 0.07724491506814957
+          }
+        },
+        "architecture": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.038690634071826935,
+            "addressing": 0.038864556699991226,
+            "satisfied": 0.08677037805318832,
+            "inapplicable": 0.78651362657547,
+            "unknown": 0.049160853028297424
+          }
+        },
+        "ui": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.013704776763916016,
+            "addressing": 0.01637738198041916,
+            "satisfied": 0.016997430473566055,
+            "inapplicable": 0.9342923164367676,
+            "unknown": 0.018628116697072983
+          }
+        },
+        "no_cheat": {
+          "state": "satisfied",
+          "probabilities": {
+            "needed": 0.04335518553853035,
+            "addressing": 0.06368376314640045,
+            "satisfied": 0.7008411884307861,
+            "inapplicable": 0.1647672802209854,
+            "unknown": 0.02735258638858795
+          }
+        },
+        "verify": {
+          "state": "satisfied",
+          "probabilities": {
+            "needed": 0.041271209716796875,
+            "addressing": 0.04531536623835564,
+            "satisfied": 0.8608260750770569,
+            "inapplicable": 0.031042521819472313,
+            "unknown": 0.021544892340898514
+          }
+        },
+        "two_strike": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.01659688539803028,
+            "addressing": 0.027457458898425102,
+            "satisfied": 0.07928630709648132,
+            "inapplicable": 0.8581781983375549,
+            "unknown": 0.018481116741895676
+          }
+        },
+        "delivery": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.02641690894961357,
+            "addressing": 0.11016708612442017,
+            "satisfied": 0.0650843009352684,
+            "inapplicable": 0.7713941335678101,
+            "unknown": 0.02693752571940422
+          }
+        },
+        "reporting": {
+          "state": "unknown",
+          "probabilities": {
+            "needed": 0.054998841136693954,
+            "addressing": 0.14827753603458405,
+            "satisfied": 0.4305821657180786,
+            "inapplicable": 0.2532041668891907,
+            "unknown": 0.11293729394674301
+          }
+        },
+        "candor": {
+          "state": "unknown",
+          "probabilities": {
+            "needed": 0.11069684475660324,
+            "addressing": 0.07867253571748734,
+            "satisfied": 0.13115383684635162,
+            "inapplicable": 0.5622641444206238,
+            "unknown": 0.117212675511837
+          }
+        }
+      },
+      "reasons": {
+        "context": {
+          "kind": "state"
+        },
+        "navigation": {
+          "kind": "state"
+        },
+        "research": {
+          "kind": "state"
+        },
+        "topology": {
+          "kind": "state"
+        },
+        "halt": {
+          "kind": "state"
+        },
+        "scope": {
+          "kind": "state"
+        },
+        "modeling": {
+          "kind": "state"
+        },
+        "surgical": {
+          "kind": "state"
+        },
+        "control_flow": {
+          "kind": "state"
+        },
+        "cqs": {
+          "kind": "state"
+        },
+        "diagnostics": {
+          "kind": "state"
+        },
+        "systems": {
+          "kind": "state"
+        },
+        "concurrency": {
+          "kind": "state"
+        },
+        "input_boundary": {
+          "kind": "state"
+        },
+        "compatibility": {
+          "kind": "state"
+        },
+        "architecture": {
+          "kind": "state"
+        },
+        "ui": {
+          "kind": "state"
+        },
+        "no_cheat": {
+          "kind": "state"
+        },
+        "verify": {
+          "kind": "state"
+        },
+        "two_strike": {
+          "kind": "state"
+        },
+        "delivery": {
+          "kind": "state"
+        },
+        "reporting": {
+          "kind": "state"
+        },
+        "candor": {
+          "kind": "state"
+        }
+      },
+      "activeRelations": [],
+      "probabilities": {
+        "context": {
+          "needed": 0.023824136704206467,
+          "addressing": 0.03819115832448006,
+          "satisfied": 0.28666624426841736,
+          "inapplicable": 0.6291090250015259,
+          "unknown": 0.022209396585822105
+        },
+        "navigation": {
+          "needed": 0.02474859170615673,
+          "addressing": 0.08591638505458832,
+          "satisfied": 0.1829289197921753,
+          "inapplicable": 0.6751676201820374,
+          "unknown": 0.031238464638590813
+        },
+        "research": {
+          "needed": 0.020269494503736496,
+          "addressing": 0.022984342649579048,
+          "satisfied": 0.050249263644218445,
+          "inapplicable": 0.8853431940078735,
+          "unknown": 0.02115374244749546
+        },
+        "topology": {
+          "needed": 0.0715717077255249,
+          "addressing": 0.12185083329677582,
+          "satisfied": 0.6622940897941589,
+          "inapplicable": 0.06415774673223495,
+          "unknown": 0.08012562990188599
+        },
+        "halt": {
+          "needed": 0.05122964456677437,
+          "addressing": 0.05671502649784088,
+          "satisfied": 0.1306004673242569,
+          "inapplicable": 0.7160305380821228,
+          "unknown": 0.04542427510023117
+        },
+        "scope": {
+          "needed": 0.016696559265255928,
+          "addressing": 0.03325755521655083,
+          "satisfied": 0.2874497175216675,
+          "inapplicable": 0.6425144076347351,
+          "unknown": 0.02008172497153282
+        },
+        "modeling": {
+          "needed": 0.028210751712322235,
+          "addressing": 0.03597709536552429,
+          "satisfied": 0.17913685739040375,
+          "inapplicable": 0.7270218133926392,
+          "unknown": 0.029653478413820267
+        },
+        "surgical": {
+          "needed": 0.35672417283058167,
+          "addressing": 0.09068822115659714,
+          "satisfied": 0.272256076335907,
+          "inapplicable": 0.11290184408426285,
+          "unknown": 0.16742973029613495
+        },
+        "control_flow": {
+          "needed": 0.027191730216145515,
+          "addressing": 0.0384552888572216,
+          "satisfied": 0.12436068803071976,
+          "inapplicable": 0.7828948497772217,
+          "unknown": 0.027097372338175774
+        },
+        "cqs": {
+          "needed": 0.01995549350976944,
+          "addressing": 0.0286618210375309,
+          "satisfied": 0.07373417913913727,
+          "inapplicable": 0.8443275690078735,
+          "unknown": 0.03332094848155975
+        },
+        "diagnostics": {
+          "needed": 0.07780753076076508,
+          "addressing": 0.060984473675489426,
+          "satisfied": 0.254088431596756,
+          "inapplicable": 0.5368090271949768,
+          "unknown": 0.07031061500310898
+        },
+        "systems": {
+          "needed": 0.02741347812116146,
+          "addressing": 0.04400298744440079,
+          "satisfied": 0.06302379816770554,
+          "inapplicable": 0.8330649733543396,
+          "unknown": 0.03249472752213478
+        },
+        "concurrency": {
+          "needed": 0.01854512467980385,
+          "addressing": 0.026967303827404976,
+          "satisfied": 0.04463673382997513,
+          "inapplicable": 0.8790861368179321,
+          "unknown": 0.030764691531658173
+        },
+        "input_boundary": {
+          "needed": 0.050701238214969635,
+          "addressing": 0.07105015963315964,
+          "satisfied": 0.3345679044723511,
+          "inapplicable": 0.49982523918151855,
+          "unknown": 0.043855465948581696
+        },
+        "compatibility": {
+          "needed": 0.09151198714971542,
+          "addressing": 0.07378117740154266,
+          "satisfied": 0.5289783477783203,
+          "inapplicable": 0.22848355770111084,
+          "unknown": 0.07724491506814957
+        },
+        "architecture": {
+          "needed": 0.038690634071826935,
+          "addressing": 0.038864556699991226,
+          "satisfied": 0.08677037805318832,
+          "inapplicable": 0.78651362657547,
+          "unknown": 0.049160853028297424
+        },
+        "ui": {
+          "needed": 0.013704776763916016,
+          "addressing": 0.01637738198041916,
+          "satisfied": 0.016997430473566055,
+          "inapplicable": 0.9342923164367676,
+          "unknown": 0.018628116697072983
+        },
+        "no_cheat": {
+          "needed": 0.04335518553853035,
+          "addressing": 0.06368376314640045,
+          "satisfied": 0.7008411884307861,
+          "inapplicable": 0.1647672802209854,
+          "unknown": 0.02735258638858795
+        },
+        "verify": {
+          "needed": 0.041271209716796875,
+          "addressing": 0.04531536623835564,
+          "satisfied": 0.8608260750770569,
+          "inapplicable": 0.031042521819472313,
+          "unknown": 0.021544892340898514
+        },
+        "two_strike": {
+          "needed": 0.01659688539803028,
+          "addressing": 0.027457458898425102,
+          "satisfied": 0.07928630709648132,
+          "inapplicable": 0.8581781983375549,
+          "unknown": 0.018481116741895676
+        },
+        "delivery": {
+          "needed": 0.02641690894961357,
+          "addressing": 0.11016708612442017,
+          "satisfied": 0.0650843009352684,
+          "inapplicable": 0.7713941335678101,
+          "unknown": 0.02693752571940422
+        },
+        "reporting": {
+          "needed": 0.054998841136693954,
+          "addressing": 0.14827753603458405,
+          "satisfied": 0.4305821657180786,
+          "inapplicable": 0.2532041668891907,
+          "unknown": 0.11293729394674301
+        },
+        "candor": {
+          "needed": 0.11069684475660324,
+          "addressing": 0.07867253571748734,
+          "satisfied": 0.13115383684635162,
+          "inapplicable": 0.5622641444206238,
+          "unknown": 0.117212675511837
+        },
+        "relation_verification_covers_completion": {
+          "applies": 0.29040586948394775,
+          "independent": 0.6127861738204956,
+          "unknown": 0.09680800139904022
+        },
+        "relation_verification_covers_report": {
+          "applies": 0.14327099919319153,
+          "independent": 0.7132587432861328,
+          "unknown": 0.14347033202648163
+        },
+        "relation_repeated_fix_covers_cause": {
+          "applies": 0.04639410227537155,
+          "independent": 0.8839342594146729,
+          "unknown": 0.06967157125473022
+        },
+        "relation_decision_blocks_continuation": {
+          "applies": 0.03489762544631958,
+          "independent": 0.9148926734924316,
+          "unknown": 0.050209611654281616
+        },
+        "relation_contract_before_acceptance": {
+          "applies": 0.026607245206832886,
+          "independent": 0.9314252734184265,
+          "unknown": 0.04196755215525627
+        }
+      },
+      "batchCount": 2,
+      "questionCount": 28,
+      "reusedDecisions": false,
+      "latencyMs": 2280
+    },
+    {
+      "arm": "candidate-flat",
+      "case": "recorded_authorized_removal_verified",
+      "comparable": true,
+      "pass": true,
+      "selected": [],
+      "cardIds": [],
+      "assessments": {
+        "context": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.023824136704206467,
+            "addressing": 0.03819115832448006,
+            "satisfied": 0.28666624426841736,
+            "inapplicable": 0.6291090250015259,
+            "unknown": 0.022209396585822105
+          }
+        },
+        "navigation": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.02474859170615673,
+            "addressing": 0.08591638505458832,
+            "satisfied": 0.1829289197921753,
+            "inapplicable": 0.6751676201820374,
+            "unknown": 0.031238464638590813
+          }
+        },
+        "research": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.020269494503736496,
+            "addressing": 0.022984342649579048,
+            "satisfied": 0.050249263644218445,
+            "inapplicable": 0.8853431940078735,
+            "unknown": 0.02115374244749546
+          }
+        },
+        "topology": {
+          "state": "satisfied",
+          "probabilities": {
+            "needed": 0.0715717077255249,
+            "addressing": 0.12185083329677582,
+            "satisfied": 0.6622940897941589,
+            "inapplicable": 0.06415774673223495,
+            "unknown": 0.08012562990188599
+          }
+        },
+        "halt": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.05122964456677437,
+            "addressing": 0.05671502649784088,
+            "satisfied": 0.1306004673242569,
+            "inapplicable": 0.7160305380821228,
+            "unknown": 0.04542427510023117
+          }
+        },
+        "scope": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.016696559265255928,
+            "addressing": 0.03325755521655083,
+            "satisfied": 0.2874497175216675,
+            "inapplicable": 0.6425144076347351,
+            "unknown": 0.02008172497153282
+          }
+        },
+        "modeling": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.028210751712322235,
+            "addressing": 0.03597709536552429,
+            "satisfied": 0.17913685739040375,
+            "inapplicable": 0.7270218133926392,
+            "unknown": 0.029653478413820267
+          }
+        },
+        "surgical": {
+          "state": "unknown",
+          "probabilities": {
+            "needed": 0.35672417283058167,
+            "addressing": 0.09068822115659714,
+            "satisfied": 0.272256076335907,
+            "inapplicable": 0.11290184408426285,
+            "unknown": 0.16742973029613495
+          }
+        },
+        "control_flow": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.027191730216145515,
+            "addressing": 0.0384552888572216,
+            "satisfied": 0.12436068803071976,
+            "inapplicable": 0.7828948497772217,
+            "unknown": 0.027097372338175774
+          }
+        },
+        "cqs": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.01995549350976944,
+            "addressing": 0.0286618210375309,
+            "satisfied": 0.07373417913913727,
+            "inapplicable": 0.8443275690078735,
+            "unknown": 0.03332094848155975
+          }
+        },
+        "diagnostics": {
+          "state": "unknown",
+          "probabilities": {
+            "needed": 0.07780753076076508,
+            "addressing": 0.060984473675489426,
+            "satisfied": 0.254088431596756,
+            "inapplicable": 0.5368090271949768,
+            "unknown": 0.07031061500310898
+          }
+        },
+        "systems": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.02741347812116146,
+            "addressing": 0.04400298744440079,
+            "satisfied": 0.06302379816770554,
+            "inapplicable": 0.8330649733543396,
+            "unknown": 0.03249472752213478
+          }
+        },
+        "concurrency": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.01854512467980385,
+            "addressing": 0.026967303827404976,
+            "satisfied": 0.04463673382997513,
+            "inapplicable": 0.8790861368179321,
+            "unknown": 0.030764691531658173
+          }
+        },
+        "input_boundary": {
+          "state": "unknown",
+          "probabilities": {
+            "needed": 0.050701238214969635,
+            "addressing": 0.07105015963315964,
+            "satisfied": 0.3345679044723511,
+            "inapplicable": 0.49982523918151855,
+            "unknown": 0.043855465948581696
+          }
+        },
+        "compatibility": {
+          "state": "unknown",
+          "probabilities": {
+            "needed": 0.09151198714971542,
+            "addressing": 0.07378117740154266,
+            "satisfied": 0.5289783477783203,
+            "inapplicable": 0.22848355770111084,
+            "unknown": 0.07724491506814957
+          }
+        },
+        "architecture": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.038690634071826935,
+            "addressing": 0.038864556699991226,
+            "satisfied": 0.08677037805318832,
+            "inapplicable": 0.78651362657547,
+            "unknown": 0.049160853028297424
+          }
+        },
+        "ui": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.013704776763916016,
+            "addressing": 0.01637738198041916,
+            "satisfied": 0.016997430473566055,
+            "inapplicable": 0.9342923164367676,
+            "unknown": 0.018628116697072983
+          }
+        },
+        "no_cheat": {
+          "state": "satisfied",
+          "probabilities": {
+            "needed": 0.04335518553853035,
+            "addressing": 0.06368376314640045,
+            "satisfied": 0.7008411884307861,
+            "inapplicable": 0.1647672802209854,
+            "unknown": 0.02735258638858795
+          }
+        },
+        "verify": {
+          "state": "satisfied",
+          "probabilities": {
+            "needed": 0.041271209716796875,
+            "addressing": 0.04531536623835564,
+            "satisfied": 0.8608260750770569,
+            "inapplicable": 0.031042521819472313,
+            "unknown": 0.021544892340898514
+          }
+        },
+        "two_strike": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.01659688539803028,
+            "addressing": 0.027457458898425102,
+            "satisfied": 0.07928630709648132,
+            "inapplicable": 0.8581781983375549,
+            "unknown": 0.018481116741895676
+          }
+        },
+        "delivery": {
+          "state": "inapplicable",
+          "probabilities": {
+            "needed": 0.02641690894961357,
+            "addressing": 0.11016708612442017,
+            "satisfied": 0.0650843009352684,
+            "inapplicable": 0.7713941335678101,
+            "unknown": 0.02693752571940422
+          }
+        },
+        "reporting": {
+          "state": "unknown",
+          "probabilities": {
+            "needed": 0.054998841136693954,
+            "addressing": 0.14827753603458405,
+            "satisfied": 0.4305821657180786,
+            "inapplicable": 0.2532041668891907,
+            "unknown": 0.11293729394674301
+          }
+        },
+        "candor": {
+          "state": "unknown",
+          "probabilities": {
+            "needed": 0.11069684475660324,
+            "addressing": 0.07867253571748734,
+            "satisfied": 0.13115383684635162,
+            "inapplicable": 0.5622641444206238,
+            "unknown": 0.117212675511837
+          }
+        }
+      },
+      "reasons": {
+        "context": {
+          "kind": "state"
+        },
+        "navigation": {
+          "kind": "state"
+        },
+        "research": {
+          "kind": "state"
+        },
+        "topology": {
+          "kind": "state"
+        },
+        "halt": {
+          "kind": "state"
+        },
+        "scope": {
+          "kind": "state"
+        },
+        "modeling": {
+          "kind": "state"
+        },
+        "surgical": {
+          "kind": "state"
+        },
+        "control_flow": {
+          "kind": "state"
+        },
+        "cqs": {
+          "kind": "state"
+        },
+        "diagnostics": {
+          "kind": "state"
+        },
+        "systems": {
+          "kind": "state"
+        },
+        "concurrency": {
+          "kind": "state"
+        },
+        "input_boundary": {
+          "kind": "state"
+        },
+        "compatibility": {
+          "kind": "state"
+        },
+        "architecture": {
+          "kind": "state"
+        },
+        "ui": {
+          "kind": "state"
+        },
+        "no_cheat": {
+          "kind": "state"
+        },
+        "verify": {
+          "kind": "state"
+        },
+        "two_strike": {
+          "kind": "state"
+        },
+        "delivery": {
+          "kind": "state"
+        },
+        "reporting": {
+          "kind": "state"
+        },
+        "candor": {
+          "kind": "state"
+        }
+      },
+      "activeRelations": [],
+      "probabilities": {
+        "context": {
+          "needed": 0.023824136704206467,
+          "addressing": 0.03819115832448006,
+          "satisfied": 0.28666624426841736,
+          "inapplicable": 0.6291090250015259,
+          "unknown": 0.022209396585822105
+        },
+        "navigation": {
+          "needed": 0.02474859170615673,
+          "addressing": 0.08591638505458832,
+          "satisfied": 0.1829289197921753,
+          "inapplicable": 0.6751676201820374,
+          "unknown": 0.031238464638590813
+        },
+        "research": {
+          "needed": 0.020269494503736496,
+          "addressing": 0.022984342649579048,
+          "satisfied": 0.050249263644218445,
+          "inapplicable": 0.8853431940078735,
+          "unknown": 0.02115374244749546
+        },
+        "topology": {
+          "needed": 0.0715717077255249,
+          "addressing": 0.12185083329677582,
+          "satisfied": 0.6622940897941589,
+          "inapplicable": 0.06415774673223495,
+          "unknown": 0.08012562990188599
+        },
+        "halt": {
+          "needed": 0.05122964456677437,
+          "addressing": 0.05671502649784088,
+          "satisfied": 0.1306004673242569,
+          "inapplicable": 0.7160305380821228,
+          "unknown": 0.04542427510023117
+        },
+        "scope": {
+          "needed": 0.016696559265255928,
+          "addressing": 0.03325755521655083,
+          "satisfied": 0.2874497175216675,
+          "inapplicable": 0.6425144076347351,
+          "unknown": 0.02008172497153282
+        },
+        "modeling": {
+          "needed": 0.028210751712322235,
+          "addressing": 0.03597709536552429,
+          "satisfied": 0.17913685739040375,
+          "inapplicable": 0.7270218133926392,
+          "unknown": 0.029653478413820267
+        },
+        "surgical": {
+          "needed": 0.35672417283058167,
+          "addressing": 0.09068822115659714,
+          "satisfied": 0.272256076335907,
+          "inapplicable": 0.11290184408426285,
+          "unknown": 0.16742973029613495
+        },
+        "control_flow": {
+          "needed": 0.027191730216145515,
+          "addressing": 0.0384552888572216,
+          "satisfied": 0.12436068803071976,
+          "inapplicable": 0.7828948497772217,
+          "unknown": 0.027097372338175774
+        },
+        "cqs": {
+          "needed": 0.01995549350976944,
+          "addressing": 0.0286618210375309,
+          "satisfied": 0.07373417913913727,
+          "inapplicable": 0.8443275690078735,
+          "unknown": 0.03332094848155975
+        },
+        "diagnostics": {
+          "needed": 0.07780753076076508,
+          "addressing": 0.060984473675489426,
+          "satisfied": 0.254088431596756,
+          "inapplicable": 0.5368090271949768,
+          "unknown": 0.07031061500310898
+        },
+        "systems": {
+          "needed": 0.02741347812116146,
+          "addressing": 0.04400298744440079,
+          "satisfied": 0.06302379816770554,
+          "inapplicable": 0.8330649733543396,
+          "unknown": 0.03249472752213478
+        },
+        "concurrency": {
+          "needed": 0.01854512467980385,
+          "addressing": 0.026967303827404976,
+          "satisfied": 0.04463673382997513,
+          "inapplicable": 0.8790861368179321,
+          "unknown": 0.030764691531658173
+        },
+        "input_boundary": {
+          "needed": 0.050701238214969635,
+          "addressing": 0.07105015963315964,
+          "satisfied": 0.3345679044723511,
+          "inapplicable": 0.49982523918151855,
+          "unknown": 0.043855465948581696
+        },
+        "compatibility": {
+          "needed": 0.09151198714971542,
+          "addressing": 0.07378117740154266,
+          "satisfied": 0.5289783477783203,
+          "inapplicable": 0.22848355770111084,
+          "unknown": 0.07724491506814957
+        },
+        "architecture": {
+          "needed": 0.038690634071826935,
+          "addressing": 0.038864556699991226,
+          "satisfied": 0.08677037805318832,
+          "inapplicable": 0.78651362657547,
+          "unknown": 0.049160853028297424
+        },
+        "ui": {
+          "needed": 0.013704776763916016,
+          "addressing": 0.01637738198041916,
+          "satisfied": 0.016997430473566055,
+          "inapplicable": 0.9342923164367676,
+          "unknown": 0.018628116697072983
+        },
+        "no_cheat": {
+          "needed": 0.04335518553853035,
+          "addressing": 0.06368376314640045,
+          "satisfied": 0.7008411884307861,
+          "inapplicable": 0.1647672802209854,
+          "unknown": 0.02735258638858795
+        },
+        "verify": {
+          "needed": 0.041271209716796875,
+          "addressing": 0.04531536623835564,
+          "satisfied": 0.8608260750770569,
+          "inapplicable": 0.031042521819472313,
+          "unknown": 0.021544892340898514
+        },
+        "two_strike": {
+          "needed": 0.01659688539803028,
+          "addressing": 0.027457458898425102,
+          "satisfied": 0.07928630709648132,
+          "inapplicable": 0.8581781983375549,
+          "unknown": 0.018481116741895676
+        },
+        "delivery": {
+          "needed": 0.02641690894961357,
+          "addressing": 0.11016708612442017,
+          "satisfied": 0.0650843009352684,
+          "inapplicable": 0.7713941335678101,
+          "unknown": 0.02693752571940422
+        },
+        "reporting": {
+          "needed": 0.054998841136693954,
+          "addressing": 0.14827753603458405,
+          "satisfied": 0.4305821657180786,
+          "inapplicable": 0.2532041668891907,
+          "unknown": 0.11293729394674301
+        },
+        "candor": {
+          "needed": 0.11069684475660324,
+          "addressing": 0.07867253571748734,
+          "satisfied": 0.13115383684635162,
+          "inapplicable": 0.5622641444206238,
+          "unknown": 0.117212675511837
+        },
+        "relation_verification_covers_completion": {
+          "applies": 0.29040586948394775,
+          "independent": 0.6127861738204956,
+          "unknown": 0.09680800139904022
+        },
+        "relation_verification_covers_report": {
+          "applies": 0.14327099919319153,
+          "independent": 0.7132587432861328,
+          "unknown": 0.14347033202648163
+        },
+        "relation_repeated_fix_covers_cause": {
+          "applies": 0.04639410227537155,
+          "independent": 0.8839342594146729,
+          "unknown": 0.06967157125473022
+        },
+        "relation_decision_blocks_continuation": {
+          "applies": 0.03489762544631958,
+          "independent": 0.9148926734924316,
+          "unknown": 0.050209611654281616
+        },
+        "relation_contract_before_acceptance": {
+          "applies": 0.026607245206832886,
+          "independent": 0.9314252734184265,
+          "unknown": 0.04196755215525627
+        }
+      },
+      "batchCount": 2,
+      "questionCount": 28,
+      "reusedDecisions": true,
+      "latencyMs": 2280
+    }
+  ]
+}

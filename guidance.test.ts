@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 import {
 	buildDecisionRequest,
+	buildDecisionQuestions,
+	batchDecisionQuestions,
 	buildDecisionState,
 	CARDS,
 	DEFAULT_CONFIG,
@@ -14,6 +17,11 @@ import {
 	parseProjectConfig,
 	renderGuidance,
 	selectCards,
+	selectGuidance,
+	validateRuleGraph,
+	CARD_RELATIONS,
+	RULE_STATES,
+	type DecisionProbabilities,
 	type TranscriptMessage,
 } from "./guidance.ts";
 
@@ -28,9 +36,32 @@ function toolTurn(name: string, args: Record<string, unknown>, output = "out", i
 const user = (text: string): TranscriptMessage => ({ role: "user", content: [{ type: "text", text }] });
 const withReasoning = { sendReasoning: true };
 
-test("card ids are unique, fit in one decision request, and every card has rules and a relevance description", () => {
+test("research-backed cards resolve to scoped primary evidence without leaking audit metadata into prompts", () => {
+	const evidence = JSON.parse(readFileSync(new URL("./research/model-failures-2026.json", import.meta.url), "utf8"));
+	for (const card of CARDS) {
+		for (const sourceId of card.evidence ?? []) {
+			const source = evidence.sources[sourceId];
+			assert.ok(source, `${card.id}: unknown evidence ${sourceId}`);
+			assert.equal(new URL(source.url).protocol, "https:");
+			assert.ok(source.models.length && source.limit && source.kind, sourceId);
+		}
+	}
+	for (const id of ["verification_budget", "trust_boundary", "evidence_provenance", "progress_visibility"]) {
+		assert.ok(CARDS.find((card) => card.id === id)?.evidence?.length, id);
+	}
+	const request = JSON.stringify(buildDecisionRequest("model", buildDecisionState([], withReasoning), buildDecisionQuestions().slice(0, 16)));
+	assert.ok(!request.includes("astra_prompt_audit"));
+	assert.ok(!request.includes("model-failures-2026"));
+});
+
+test("expanded card library and relation questions are unique and each batch fits the API", () => {
 	assert.equal(new Set(CARDS.map((card) => card.id)).size, CARDS.length);
-	assert.ok(CARDS.length <= MAX_DECISION_QUESTIONS);
+	assert.ok(CARDS.length > MAX_DECISION_QUESTIONS);
+	const questions = buildDecisionQuestions();
+	const batches = batchDecisionQuestions(questions);
+	assert.deepEqual(batches.flat(), questions, "every card and relation is evaluated exactly once");
+	assert.equal(questions.length, CARDS.length + CARD_RELATIONS.length);
+	assert.ok(batches.every((batch) => batch.length > 0 && batch.length <= 16));
 	for (const card of CARDS) {
 		assert.ok(card.when.length > 20, card.id);
 		assert.ok(card.rules.length > 0, card.id);
@@ -148,24 +179,31 @@ test("buildDecisionState summarises steps older than the recent window", () => {
 	assert.equal(state.recentSteps.length, 10);
 });
 
-test("decision request asks one yes/no question per card", () => {
-	const request = buildDecisionRequest("m", buildDecisionState([user("t")], withReasoning), CARDS) as {
+test("decision requests distinguish current rule states and include relation conditions within the question limit", () => {
+	const questions = buildDecisionQuestions();
+	const batch = batchDecisionQuestions(questions)[0];
+	const request = buildDecisionRequest("m", buildDecisionState([user("t")], withReasoning), batch) as {
 		model: string;
 		questions: Record<string, { type: string; criteria: object }>;
 	};
 	assert.equal(request.model, "m");
-	assert.deepEqual(Object.keys(request.questions), CARDS.map((card) => card.id));
-	assert.deepEqual(Object.keys(request.questions.halt.criteria), ["yes", "no"]);
-	const tooMany = Array.from({ length: MAX_DECISION_QUESTIONS + 1 }, (_, i) => ({ ...CARDS[0], id: `c${i}` }));
+	assert.deepEqual(Object.keys(request.questions), batch.map((question) => question.id));
+	assert.deepEqual(Object.keys(request.questions.halt.criteria), ["needed", "addressing", "satisfied", "inapplicable", "unknown"]);
+	const tooMany = Array.from({ length: MAX_DECISION_QUESTIONS + 1 }, (_, i) => ({ ...batch[0], id: `c${i}` }));
 	assert.throws(() => buildDecisionRequest("m", buildDecisionState([user("t")], withReasoning), tooMany), /最多 16/);
+	assert.throws(() => buildDecisionRequest("m", buildDecisionState([user("t")], withReasoning), []), /1 至/);
 });
 
-test("parseDecisionResponse requires a yes probability for every card", () => {
-	const cards = CARDS.slice(0, 2);
-	const answer = (yes: number) => ({ type: "choice", choice: yes >= 0.5 ? "yes" : "no", probabilities: { yes, no: 1 - yes } });
-	assert.deepEqual(parseDecisionResponse({ answers: { [cards[0].id]: answer(0.9), [cards[1].id]: answer(0.1) } }, cards), { [cards[0].id]: 0.9, [cards[1].id]: 0.1 });
-	assert.throws(() => parseDecisionResponse({ answers: { [cards[0].id]: answer(0.9) } }, cards), new RegExp(cards[1].id));
-	assert.throws(() => parseDecisionResponse({}, cards), /answers/);
+test("malformed or missing state distributions fail the decision instead of becoming negative scores", () => {
+	const questions = buildDecisionQuestions(CARDS.slice(0, 2), []);
+	const probabilities = { needed: 0.9, addressing: 0.025, satisfied: 0.025, inapplicable: 0.025, unknown: 0.025 };
+	const answer = { probabilities };
+	assert.deepEqual(parseDecisionResponse({ answers: Object.fromEntries(questions.map(({ id }) => [id, answer])) }, questions), Object.fromEntries(questions.map(({ id }) => [id, probabilities])));
+	assert.throws(() => parseDecisionResponse({ answers: { [questions[0].id]: answer } }, questions), new RegExp(questions[1].id));
+	for (const invalid of [{ needed: 1 }, { ...probabilities, unknown: -1 }, { ...probabilities, needed: NaN }, { ...probabilities, needed: 0.5 }, { ...probabilities, no: 0 }]) {
+		assert.throws(() => parseDecisionResponse({ answers: { [questions[0].id]: { probabilities: invalid } } }, questions.slice(0, 1)), /决策响应/);
+	}
+	assert.throws(() => parseDecisionResponse({}, questions), /answers/);
 });
 
 test("selectCards keeps confident cards by score, capped", () => {
@@ -178,9 +216,74 @@ test("renderGuidance renders selected cards and the available architecture path"
 	const text =
 		renderGuidance({ cardIds: ["delivery", "context", "scope"], architectureDoc: "ARCHITECTURE.md" }) ?? "";
 	assert.ok(text.startsWith("<engineering-guidance>"));
-	for (const fragment of ["【交付报告】", "【上下文与假设核验】", "ARCHITECTURE.md", "【任务锚点与行动边界】"]) {
+	for (const fragment of ["【完成已授权工作】", "【上下文与假设核验】", "ARCHITECTURE.md", "【任务锚点与行动边界】"]) {
 		assert.ok(text.includes(fragment), fragment);
 	}
+});
+
+function judgments(states: Record<string, string>, applied: string[] = []): DecisionProbabilities {
+	return Object.fromEntries(buildDecisionQuestions().map(({ id, criteria }) => [id, Object.fromEntries(Object.keys(criteria).map((option) => {
+		const winner = id.startsWith("relation_") ? (applied.includes(id.slice(9)) ? "applies" : "independent") : states[id] ?? "inapplicable";
+		return [option, option === winner ? 0.96 : 0.04 / (Object.keys(criteria).length - 1)];
+	}))]));
+}
+const policy = { minProbability: 0.6, maxCards: 3 };
+
+test("only needed rules are injected; ongoing, satisfied and uncertain obligations remain visible", () => {
+	const result = selectGuidance(judgments({ context: "addressing", verify: "satisfied", halt: "unknown", research: "needed" }), policy);
+	assert.deepEqual(result.cardIds, ["research"]);
+	assert.equal(result.assessments.context.state, "addressing");
+	assert.equal(result.assessments.verify.state, "satisfied");
+	assert.equal(result.assessments.halt.state, "unknown");
+	const uncertain = judgments({});
+	uncertain.context = Object.fromEntries(RULE_STATES.map((state) => [state, 0.2]));
+	assert.equal(selectGuidance(uncertain, policy).assessments.context.state, "unknown");
+});
+
+test("validation covers completion only for the same obligation and before the injection cap", () => {
+	const input = judgments({ verify: "needed", delivery: "needed", reporting: "needed" }, ["verification_covers_completion", "verification_covers_report"]);
+	input.verify = { needed: 0.65, addressing: 0.1, satisfied: 0.1, inapplicable: 0.1, unknown: 0.05 };
+	const result = selectGuidance(input, { ...policy, maxCards: 1 });
+	assert.deepEqual(result.cardIds, ["verify"], "the concrete correction outranks duplicate higher scores");
+	assert.deepEqual(result.reasons.delivery, { kind: "covered", by: "verify" });
+	const separate = selectGuidance(judgments({ verify: "needed", delivery: "needed" }), policy);
+	assert.deepEqual(new Set(separate.cardIds), new Set(["verify", "delivery"]), "a separate unfinished feature is not suppressed");
+	const coveredButNotNeeded = selectGuidance(judgments({ verify: "satisfied", delivery: "needed" }, ["verification_covers_completion"]), policy);
+	assert.deepEqual(coveredButNotNeeded.cardIds, ["delivery"], "a non-selected source cannot erase a needed target");
+});
+
+test("a real pending user decision blocks only dependent work, even while the agent is already asking", () => {
+	const applied = ["decision_blocks_continuation"];
+	const blocked = selectGuidance(judgments({ halt: "addressing", delivery: "needed" }, applied), policy);
+	assert.deepEqual(blocked.cardIds, []);
+	assert.deepEqual(blocked.reasons.delivery, { kind: "blocked", by: "halt" });
+	assert.deepEqual(selectGuidance(judgments({ halt: "satisfied", delivery: "needed" }, applied), policy).cardIds, ["delivery"]);
+	assert.deepEqual(selectGuidance(judgments({ halt: "addressing", delivery: "needed" }), policy).cardIds, ["delivery"], "independently authorized work continues");
+});
+
+test("unresolved contradictory acceptance requirements defer only their dependent verification", () => {
+	const result = selectGuidance(judgments({ no_cheat: "needed", verify: "needed" }, ["contract_before_acceptance"]), policy);
+	assert.deepEqual(result.cardIds, ["no_cheat"]);
+	assert.deepEqual(result.reasons.verify, { kind: "prerequisite", by: "no_cheat" });
+	const uncertain = judgments({ no_cheat: "needed", verify: "needed" });
+	uncertain.relation_contract_before_acceptance = { applies: 0.4, independent: 0.3, unknown: 0.3 };
+	assert.equal(selectGuidance(uncertain, policy).cardIds.length, 2, "unknown relations cannot suppress a rule");
+});
+
+test("invalid graph references and cycles are rejected before requests", () => {
+	assert.throws(() => validateRuleGraph(CARDS, [{ ...CARD_RELATIONS[0], target: "absent" }]), /引用/);
+	assert.throws(() => validateRuleGraph(CARDS, [CARD_RELATIONS[0], { ...CARD_RELATIONS[0], id: "reverse", source: "delivery", target: "verify" }]), /循环/);
+});
+
+test("new evidence invalidates the snapshot cache even when the changed text is truncated", () => {
+	const before = [user("验证"), ...toolTurn("edit", { text: "a".repeat(800) + "old" + "z".repeat(800) })];
+	const after = structuredClone(before);
+	(after[1].content as { arguments: { text: string } }[])[0].arguments.text = "a".repeat(800) + "new" + "z".repeat(800);
+	const a = buildDecisionState(before, withReasoning);
+	const b = buildDecisionState(after, withReasoning);
+	assert.equal(a.recentSteps[0].input, b.recentSteps[0].input);
+	assert.notEqual(a.evidenceRevision, b.evidenceRevision);
+	assert.equal(a.evidenceRevision, buildDecisionState(before, withReasoning).evidenceRevision);
 });
 
 test("short continuations retain the original constraints and tool evidence", () => {

@@ -17,6 +17,7 @@ export const ARMS = {
 
 export function experimentMetadata() {
 	const files = ["protocol.md", "guidance.ts", "index.ts", "decision.ts", "eval/static.ts", "eval/guidance-log.ts", "eval/checks.mjs", "eval/fixtures.mjs", "eval/run.mjs", "eval/score.mjs", "eval/experiment.mjs", "eval/routing.mjs", "eval/long/scenario.mjs", "eval/long/run.mjs", "eval/long/score.mjs"];
+	files.push("research/model-failures-2026.json", "eval/model-failures-cases.mjs");
 	const hashes = Object.fromEntries(files.map((file) => [file, createHash("sha256").update(readFileSync(join(ROOT, file))).digest("hex")]));
 	const configPath = join(homedir(), ".pi", "agent", "eng-protocol.json");
 	const parsed = parseConfig(existsSync(configPath) ? JSON.parse(readFileSync(configPath, "utf8")) : {}, DEFAULT_CONFIG, configPath);
