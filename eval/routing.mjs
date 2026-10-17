@@ -3,7 +3,7 @@ import { exec, execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { homedir, tmpdir } from "node:os";
-import { join, resolve, sep } from "node:path";
+import { dirname, join, resolve, sep } from "node:path";
 import { pathToFileURL } from "node:url";
 import { promisify } from "node:util";
 import * as candidate from "../guidance.ts";
@@ -63,6 +63,7 @@ if (enabledArms.some((arm) => !["baseline", "candidate"].includes(arm))) throw n
 const configPath = join(homedir(), ".pi", "agent", "eng-protocol.json");
 const { config, errors } = candidate.parseConfig(JSON.parse(readFileSync(configPath, "utf8")), candidate.DEFAULT_CONFIG, configPath);
 if (errors.length) throw new Error("Invalid decision configuration");
+if (config.decision.provider !== "subq") throw new Error("Legacy routing comparison requires SubQ; use eval/agent-routing.mjs for other providers");
 const reference = candidate.parseConfigValueReference(config.decision.apiKey);
 let apiKey;
 try {
@@ -79,6 +80,14 @@ try {
 	const baselinePath = join(directory, "guidance.ts");
 	const baselineCode = baselineFile ? readFileSync(baselineFile) : execFileSync("git", ["show", `${baselineRef}:guidance.ts`], { cwd: ROOT });
 	writeFileSync(baselinePath, baselineCode);
+	// Newer saved baselines split the pure core into these fixed local modules.
+	const baselineDependencies = {};
+	for (const dependency of ["ledger.ts", "agent-cards.ts"]) {
+		if (!baselineCode.toString().includes(`./${dependency}`)) continue;
+		const code = baselineFile ? readFileSync(join(dirname(baselineFile), dependency)) : execFileSync("git", ["show", `${baselineRef}:${dependency}`], { cwd: ROOT });
+		writeFileSync(join(directory, dependency), code);
+		baselineDependencies[dependency] = createHash("sha256").update(code).digest("hex");
+	}
 	const baseline = await import(pathToFileURL(baselinePath).href);
 	for (const [arm, core] of [["baseline", baseline], ["candidate", candidate]]) {
 		if (!enabledArms.includes(arm)) continue;
@@ -107,7 +116,7 @@ try {
 			}
 		}
 	}
-	console.log(JSON.stringify({ experiment: experimentMetadata(), caseFile, caseHash: createHash("sha256").update(JSON.stringify(selectedCases)).digest("hex"), caseIds: selectedCases.map(({ id }) => id), baselineRef, baselineFile, baselineHash: createHash("sha256").update(baselineCode).digest("hex"), rows }, null, 2));
+	console.log(JSON.stringify({ experiment: experimentMetadata(), routingPolicy: "legacy-exhaustive-subq-no-scheduling", caseFile, caseHash: createHash("sha256").update(JSON.stringify(selectedCases)).digest("hex"), caseIds: selectedCases.map(({ id }) => id), baselineRef, baselineFile, baselineDependencies, baselineHash: createHash("sha256").update(baselineCode).digest("hex"), rows }, null, 2));
 } finally {
 	closeDecisionClient();
 	if (!resolve(directory).startsWith(resolve(tmpdir()) + sep)) throw new Error("Unexpected temporary path");

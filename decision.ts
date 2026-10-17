@@ -1,11 +1,11 @@
-// HTTP client for a System One decision endpoint (choice questions -> per-option probabilities).
+// Shared HTTP transport; the legacy exhaustive SubQ evaluator remains below for baseline comparisons.
 import http from "node:http";
 import https from "node:https";
 import { batchDecisionQuestions, buildDecisionQuestions, buildDecisionRequest, parseDecisionResponse, type DecisionProbabilities, type DecisionQuestion, type DecisionSource, type DecisionState } from "./guidance.ts";
 
 const MAX_RESPONSE_BYTES = 1_048_576;
 
-// A fresh TLS handshake costs ~2 s on the first decision (measured); keep-alive brings later ones under 1 s.
+// Reuse connections without assuming a fixed network latency improvement.
 let agents: { https: https.Agent; http: http.Agent } | undefined;
 
 function getAgents() {
@@ -20,7 +20,7 @@ export function closeDecisionClient(): void {
 }
 
 /** One POST, no retries (every request is billed). Non-2xx bodies are discarded unread. */
-export function requestDecision(source: DecisionSource, payload: unknown, signal: AbortSignal): Promise<unknown> {
+export function requestDecision(source: DecisionSource, payload: unknown, signal: AbortSignal, headers?: Record<string, string>): Promise<unknown> {
 	const url = new URL(source.endpoint);
 	const secure = url.protocol === "https:";
 	return new Promise((resolve, reject) => {
@@ -31,7 +31,7 @@ export function requestDecision(source: DecisionSource, payload: unknown, signal
 				method: "POST",
 				signal,
 				agent: secure ? getAgents().https : getAgents().http,
-				headers: { Authorization: `Bearer ${source.apiKey}`, "Content-Type": "application/json" },
+				headers: { ...(headers ?? (source.apiKey ? { Authorization: `Bearer ${source.apiKey}` } : {})), "Content-Type": "application/json" },
 			},
 			(response) => {
 				const status = response.statusCode ?? 0;

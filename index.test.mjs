@@ -24,7 +24,7 @@ test("extension lifecycle uses current decisions and preserves the transcript", 
 		const held = [];
 		onRequest = (response) => {
 			held.push(response);
-			if (held.length === batches) resolve(held[0]);
+			if (held.length === Math.min(2, batches)) resolve(held[0]);
 		};
 	});
 	const respond = (response) => {
@@ -51,7 +51,7 @@ test("extension lifecycle uses current decisions and preserves the transcript", 
 	const missing = () => Object.assign(new Error("absent in test environment"), { code: "ENOENT" });
 	t.mock.method(fs, "readFile", async (path) => {
 		if (path === fileURLToPath(new URL("./protocol.md", import.meta.url))) return protocolText;
-		if (path === globalConfig) return JSON.stringify({ maxCards, decision: { endpoint: `http://127.0.0.1:${server.address().port}/v1`, apiKey: "local-test", timeoutMs } });
+		if (path === globalConfig) return JSON.stringify({ maxCards, maxQuestions: 0, localPrefilter: false, cooldownSteps: 0, readOnlyGating: "off", decision: { endpoint: `http://127.0.0.1:${server.address().port}/v1`, apiKey: "local-test", timeoutMs, fallback: "none", retryAfterMs: 0 } });
 		if (String(path).endsWith(join(".pi", "eng-protocol.md"))) return "使用项目既有组件";
 		throw missing();
 	});

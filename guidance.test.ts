@@ -60,7 +60,7 @@ test("expanded card library and relation questions are unique and each batch fit
 	const questions = buildDecisionQuestions();
 	const batches = batchDecisionQuestions(questions);
 	assert.deepEqual(batches.flat(), questions, "every card and relation is evaluated exactly once");
-	assert.equal(questions.length, CARDS.length + CARD_RELATIONS.length);
+	assert.equal(questions.length, CARDS.length + CARD_RELATIONS.filter((edge) => edge.evaluation !== "structural").length);
 	assert.ok(batches.every((batch) => batch.length > 0 && batch.length <= 16));
 	for (const card of CARDS) {
 		assert.ok(card.when.length > 20, card.id);

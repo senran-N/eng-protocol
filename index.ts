@@ -15,23 +15,29 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 import type { ContextEvent, ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
-import { closeDecisionClient, evaluateDecision } from "./decision.ts";
+import { closeDecisionClient } from "./decision.ts";
+import { branchMessages, buildLedger, observeTools, type ToolObservation } from "./ledger.ts";
+import { GuidanceScheduler, planEvaluation } from "./scheduling.ts";
+import { getDecisionProvider, localAssessments, LOCAL_CARDS, resolveProviderResult } from "./providers.ts";
 import {
 	buildDecisionState,
 	CARDS,
+	CARD_RELATIONS,
 	DEFAULT_CONFIG,
 	type DecisionConfig,
 	type DecisionSource,
 	type DecisionState,
 	type ProtocolConfig,
 	type GuidanceSelection,
+	type GuidanceCard,
 	parseConfig,
 	parseConfigValueReference,
 	parseProjectConfig,
 	PLAN_INSTRUCTION,
 	renderGuidance,
-	selectGuidance,
+	selectAssessments,
 	RULE_STATE_LABELS,
+	agencyInstruction,
 } from "./guidance.ts";
 
 type AgentMessage = ContextEvent["messages"][number];
@@ -59,6 +65,8 @@ interface Decided extends GuidanceSelection {
 	batchCount: number;
 	questionCount: number;
 	latencyMs: number;
+	mode: "remote" | "partial" | "local";
+	errors: string[];
 }
 
 type DecisionOutcome = { kind: "none" } | Decided | { kind: "failed"; error: string };
@@ -77,8 +85,8 @@ async function readJson(path: string, errors: string[]): Promise<unknown> {
 	if (text === undefined) return undefined;
 	try {
 		return JSON.parse(text);
-	} catch (error) {
-		errors.push(`${path}: JSON 解析失败：${(error as Error).message}`);
+	} catch {
+		errors.push(`${path}: JSON 解析失败，请检查文件格式`);
 		return undefined;
 	}
 }
@@ -98,16 +106,19 @@ async function resolveApiKey(value: string): Promise<string | { error: string }>
 	if (reference.kind === "env") return process.env[reference.name]?.trim() || { error: `环境变量 ${reference.name} 未设置` };
 	try {
 		const { stdout } = await execAsync(reference.command, { timeout: API_KEY_COMMAND_TIMEOUT_MS, windowsHide: true });
-		return stdout.trim() || { error: `命令没有输出：${reference.command}` };
-	} catch (error) {
-		return { error: `命令执行失败：${reference.command}（${(error as Error).message.split("\n")[0]}）` };
+		return stdout.trim() || { error: "API key 命令没有输出" };
+	} catch {
+		return { error: "API key 命令执行失败，请检查全局配置" };
 	}
 }
 
-async function resolveDecisionSource(decision: DecisionConfig): Promise<DecisionSource | { error: string }> {
+export async function resolveDecisionSource(decision: DecisionConfig): Promise<DecisionSource | { error: string }> {
+	if (decision.provider === "local") return { ...decision, apiKey: "" };
+	if (decision.provider !== "subq" && (decision.endpoint === DEFAULT_CONFIG.decision.endpoint || decision.model === DEFAULT_CONFIG.decision.model)) return { error: "切换 provider 时须在全局 decision 中明确配置匹配的 endpoint、model 和 apiKey" };
 	const apiKey = await resolveApiKey(decision.apiKey);
 	if (typeof apiKey !== "string") return { error: `决策模型 API key 解析失败（decision.apiKey）：${apiKey.error}` };
-	return { endpoint: decision.endpoint, model: decision.model, apiKey };
+	if (!apiKey && !["localhost", "127.0.0.1", "[::1]"].includes(new URL(decision.endpoint).hostname)) return { error: "远端决策服务需要 API key；只有本机服务允许空 key" };
+	return { ...decision, apiKey };
 }
 
 async function loadSessionSettings(cwd: string): Promise<SessionSettings> {
@@ -151,8 +162,8 @@ function appendGuidance(messages: AgentMessage[], guidance: string): AgentMessag
 	return [...messages, guidanceMessage];
 }
 
-function getCardTitles(cardIds: readonly string[]): string {
-	return cardIds.map((id) => CARDS.find((card) => card.id === id)?.title ?? id).join("·");
+function getCardTitles(cardIds: readonly string[], cards: readonly GuidanceCard[] = [...CARDS, ...LOCAL_CARDS]): string {
+	return cardIds.map((id) => cards.find((card) => card.id === id)?.title ?? id).join("·");
 }
 
 const OUTCOME_LABELS: { [K in DecisionOutcome["kind"]]: (outcome: Extract<DecisionOutcome, { kind: K }>) => string } = {
@@ -168,12 +179,25 @@ function getOutcomeLabel(outcome: DecisionOutcome): string {
 export default function engProtocol(pi: ExtensionAPI) {
 	let settings: SessionSettings | undefined;
 	let enabledOverride: boolean | undefined;
+	let agencyOverride: ProtocolConfig["agencyLevel"] | undefined;
 	let outcome: DecisionOutcome = { kind: "none" };
 	let lastDecided: Decided | undefined;
 	let lastGuidance: string | undefined;
 	let decisionController = new AbortController();
 	let activeDecision: AbortController | undefined;
 	const notified = new Set<string>();
+	const scheduler = new GuidanceScheduler();
+	let remoteRetryAt = 0;
+	let remoteError = "";
+	let branchId: string | undefined;
+	const metrics = { contexts: 0, cacheHits: 0, gated: 0, requests: 0, questions: 0, prefiltered: 0, deferred: 0, failures: 0, partial: 0, local: 0, injected: 0, cooled: 0, waitMs: 0 };
+	const latencies: number[] = [];
+	const metricsLine = () => {
+		const sorted = [...latencies].sort((a, b) => a - b);
+		return JSON.stringify({ ...metrics, latencySamples: sorted.length, p50Ms: sorted[Math.max(0, Math.ceil(sorted.length * 0.5) - 1)] ?? 0, p95Ms: sorted[Math.max(0, Math.ceil(sorted.length * 0.95) - 1)] ?? 0 });
+	};
+	const cards = () => [...CARDS, ...(settings?.config.customCards ?? []), ...LOCAL_CARDS];
+	const currentConfig = (): ProtocolConfig => ({ ...(settings?.config ?? DEFAULT_CONFIG), agencyLevel: agencyOverride ?? settings?.config.agencyLevel ?? DEFAULT_CONFIG.agencyLevel });
 
 	const isEnabled = () => enabledOverride ?? settings?.config.enabled ?? DEFAULT_CONFIG.enabled;
 
@@ -185,6 +209,9 @@ export default function engProtocol(pi: ExtensionAPI) {
 		outcome = { kind: "none" };
 		lastDecided = undefined;
 		lastGuidance = undefined;
+		scheduler.reset();
+		remoteRetryAt = 0;
+		remoteError = "";
 	}
 
 	async function reloadSettings(cwd: string) {
@@ -217,26 +244,70 @@ export default function engProtocol(pi: ExtensionAPI) {
 			ctx.ui.setStatus(STATUS_KEY, theme.fg("warning", "⚖ 决策不可用"));
 			return;
 		}
-		const focus = outcome.kind === "decided" && outcome.cardIds.length > 0 ? getCardTitles(outcome.cardIds) : "—";
+		const focus = outcome.kind === "decided" && outcome.cardIds.length > 0 ? getCardTitles(outcome.cardIds, cards()) : "—";
 		ctx.ui.setStatus(STATUS_KEY, theme.fg("accent", `⚖ ${focus}`));
 	}
 
-	async function decide(source: DecisionSource, state: DecisionState, ctx: ExtensionContext, lifecycleSignal: AbortSignal, contextSignal: AbortSignal): Promise<Decided | undefined> {
-		const stateKey = JSON.stringify(state);
-		if (lastDecided?.stateKey === stateKey) {
-			outcome = lastDecided;
-			return lastDecided;
+	async function decide(source: SessionSettings["source"], state: DecisionState, observations: ToolObservation[], cooling: Set<string>, ctx: ExtensionContext, lifecycleSignal: AbortSignal, contextSignal: AbortSignal): Promise<Decided | undefined> {
+		// Reminder delivery metadata must not invalidate an otherwise identical evidence snapshot.
+		const stateKey = JSON.stringify({ ...state, recentReminders: undefined });
+		const config = currentConfig();
+		const allCards = cards();
+		const select = (assessments: GuidanceSelection["assessments"], activeRelations: string[]) => selectAssessments(assessments, activeRelations, config, allCards, CARD_RELATIONS, cooling);
+		if (lastDecided?.stateKey === stateKey && (lastDecided.mode === "remote" || Date.now() < remoteRetryAt || (!("error" in source) && source.provider === "local"))) {
+			metrics.cacheHits++;
+			outcome = { ...lastDecided, ...select(lastDecided.assessments, lastDecided.activeRelations) };
+			return outcome;
 		}
-		const config = settings?.config ?? DEFAULT_CONFIG;
 		const signal = AbortSignal.any([lifecycleSignal, contextSignal, AbortSignal.timeout(config.decision.timeoutMs), ...(ctx.signal ? [ctx.signal] : [])]);
 		const startedAt = performance.now();
-		try {
-			const { probabilities, batchCount, questionCount } = await evaluateDecision(source, state, signal);
-			signal.throwIfAborted();
-			const selection = selectGuidance(probabilities, config);
-			lastDecided = { kind: "decided", stateKey, ...selection, batchCount, questionCount, latencyMs: Math.round(performance.now() - startedAt) };
+		let attemptedBatches = 0;
+		let attemptedQuestions = 0;
+		const recordLatency = () => {
+			const latencyMs = Math.round(performance.now() - startedAt);
+			metrics.waitMs += latencyMs;
+			latencies.push(latencyMs);
+			if (latencies.length > 256) latencies.shift();
+			return latencyMs;
+		};
+		const isStale = () => lifecycleSignal.aborted || contextSignal.aborted || ctx.signal?.aborted;
+		const finish = (selection: GuidanceSelection, mode: Decided["mode"], batchCount: number, questionCount: number, errors: string[]): Decided | undefined => {
+			if (isStale()) return undefined;
+			const latencyMs = recordLatency();
+			metrics.cooled += Object.values(selection.reasons).filter((reason) => reason.kind === "cooldown").length;
+			lastDecided = { kind: "decided", stateKey, ...selection, batchCount, questionCount, latencyMs, mode, errors };
 			outcome = lastDecided;
 			return lastDecided;
+		};
+		const fallback = (error?: string): Decided | undefined => {
+			if (isStale()) return undefined;
+			if (config.decision.fallback === "none" && ("error" in source || source.provider !== "local")) {
+				recordLatency();
+				lastDecided = undefined;
+				outcome = { kind: "failed", error: error ?? "决策不可用" };
+				return undefined;
+			}
+			metrics.local++;
+			const assessments: GuidanceSelection["assessments"] = Object.fromEntries(allCards.map((card) => [card.id, { state: "unknown", probabilities: {}, source: "unavailable" }]));
+			Object.assign(assessments, localAssessments(state, observations));
+			return finish(select(assessments, []), "local", attemptedBatches, attemptedQuestions, error ? [error] : []);
+		};
+		if ("error" in source) return fallback(source.error);
+		if (source.provider === "local") return fallback();
+		if (Date.now() < remoteRetryAt) return fallback(remoteError);
+		try {
+			const remoteCards = allCards.filter((card) => !LOCAL_CARDS.some((local) => local.id === card.id));
+			const plan = planEvaluation(state, remoteCards, observations, config.localPrefilter, config.maxQuestions, scheduler.ages(remoteCards));
+			metrics.prefiltered += Object.values(plan.local).filter((item) => item.source === "local").length;
+			metrics.deferred += Object.values(plan.local).filter((item) => item.source === "deferred").length;
+			const result = await getDecisionProvider(source).evaluate(source, state, plan.questions, signal, (count) => { metrics.requests++; metrics.questions += count; attemptedBatches++; attemptedQuestions += count; });
+			signal.throwIfAborted();
+			const resolved = resolveProviderResult(result, remoteCards, config.minProbability, plan.local, config);
+			scheduler.markEvaluated(Object.keys(resolved.assessments).filter((id) => ["subq", "structured"].includes(resolved.assessments[id].source ?? "")));
+			for (const card of LOCAL_CARDS) resolved.assessments[card.id] = { state: "inapplicable", probabilities: {}, source: "local" };
+			if (result.errors.length) { metrics.partial++; remoteRetryAt = Date.now() + config.decision.retryAfterMs; remoteError = result.errors.join("；"); }
+			else { remoteRetryAt = 0; remoteError = ""; }
+			return finish(select(resolved.assessments, resolved.activeRelations), result.errors.length ? "partial" : "remote", result.batchCount, result.questionCount, result.errors);
 		} catch (error) {
 			if (lifecycleSignal.aborted || contextSignal.aborted) return undefined;
 			lastDecided = undefined;
@@ -244,19 +315,27 @@ export default function engProtocol(pi: ExtensionAPI) {
 				outcome = { kind: "none" };
 				return undefined;
 			}
-			const message = error instanceof Error ? error.message : String(error);
-			outcome = { kind: "failed", error: message };
-			notifyOnce(ctx, `决策模型调用失败，本次跳过动态提醒：${message}`);
-			return undefined;
+			const message = signal.aborted ? "决策请求超时" : error instanceof Error ? error.message : String(error);
+			metrics.failures++;
+			remoteRetryAt = Date.now() + config.decision.retryAfterMs;
+			remoteError = message;
+			notifyOnce(ctx, `决策模型调用失败，${config.decision.fallback === "local" ? "使用本地事实提醒" : "本次跳过动态提醒"}：${message}`);
+			return fallback(message);
 		}
 	}
 
 	pi.on("session_start", async (_event, ctx) => {
+		branchId = undefined;
+		latencies.length = 0;
+		for (const key of Object.keys(metrics) as (keyof typeof metrics)[]) metrics[key] = 0;
 		const loaded = await reloadSettings(ctx.cwd);
 		for (const error of loaded.configErrors) notifyOnce(ctx, error);
-		if ("error" in loaded.source) notifyOnce(ctx, `阶段引导停用：${loaded.source.error}`);
+		if ("error" in loaded.source) notifyOnce(ctx, `远端决策不可用：${loaded.source.error}`);
 		updateStatus(ctx);
 	});
+	pi.on("session_tree", () => { resetDecision(); branchId = undefined; });
+	pi.on("session_before_switch", () => { resetDecision(); branchId = undefined; });
+	pi.on("session_before_fork", () => { resetDecision(); branchId = undefined; });
 
 	pi.on("session_shutdown", async () => {
 		resetDecision();
@@ -268,6 +347,7 @@ export default function engProtocol(pi: ExtensionAPI) {
 		const sections = event.systemPromptOptions.sections;
 		sections.engineering_protocol = settings.protocolText;
 		sections.engineering_plan = PLAN_INSTRUCTION;
+		sections.engineering_agency = agencyInstruction(currentConfig().agencyLevel);
 		if (settings?.projectRules) sections.project_engineering_rules = settings.projectRules;
 	});
 
@@ -279,18 +359,47 @@ export default function engProtocol(pi: ExtensionAPI) {
 		const currentDecision = new AbortController();
 		activeDecision = currentDecision;
 		lastGuidance = undefined;
-		if (!isEnabled() || !settings || "error" in settings.source || ctx.signal?.aborted) return;
+		if (!isEnabled() || !settings || ctx.signal?.aborted) return;
+		metrics.contexts++;
 		const lifecycleSignal = decisionController.signal;
-		const decided = await decide(settings.source, buildDecisionState(event.messages, { ...settings.config, projectRules: settings.projectRules }), ctx, lifecycleSignal, currentDecision.signal);
+		let history = event.messages;
+		let ledgerSource: "branch" | "visible" = "visible";
+		if (ctx.sessionManager?.getBranch) {
+			const entries = ctx.sessionManager.getBranch();
+			const sessionId = ctx.sessionManager.getSessionId();
+			if (branchId && branchId !== sessionId) { scheduler.reset(); lastDecided = undefined; }
+			branchId = sessionId;
+			const branch = branchMessages(entries);
+			// Current context can contain fresher tool results than persisted branch entries.
+			const branchCalls = new Map(observeTools(branch).map((item) => [item.id, item]));
+			const visibleCalls = observeTools(event.messages);
+			if (branch.length && visibleCalls.every((item) => branchCalls.get(item.id)?.fingerprint === item.fingerprint && branchCalls.get(item.id)?.status === item.status)) {
+				history = branch as AgentMessage[];
+				ledgerSource = "branch";
+			}
+		}
+		const config = currentConfig();
+		const observations = observeTools(history);
+		const state = buildDecisionState(event.messages, { ...config, projectRules: settings.projectRules, ledger: buildLedger(history, ledgerSource, observations) });
+		state.agencyLevel = config.agencyLevel;
+		const schedule = scheduler.observe(state, observations, config);
+		state.recentReminders = schedule.reminders;
+		if (schedule.gate) { metrics.gated++; outcome = { kind: "none" }; updateStatus(ctx); return; }
+		const decided = await decide(settings.source, state, observations, schedule.cooling, ctx, lifecycleSignal, currentDecision.signal);
 		if (lifecycleSignal.aborted || currentDecision.signal.aborted) return;
 		updateStatus(ctx);
 		if (!decided || ctx.signal?.aborted) return;
 		const guidance = renderGuidance({
 			cardIds: decided.cardIds,
 			architectureDoc: settings.architectureDoc,
+			cards: cards(),
+			groups: decided.groups,
+			resolutions: decided.resolutions,
 		});
 		if (!guidance) return;
 		lastGuidance = guidance;
+		scheduler.markInjected(decided.cardIds, state);
+		metrics.injected += decided.cardIds.length;
 		return { messages: appendGuidance(event.messages, guidance) };
 	});
 
@@ -299,8 +408,8 @@ export default function engProtocol(pi: ExtensionAPI) {
 			description: "显示当前状态",
 			run: () => {
 				const source = settings?.source;
-				const sourceLine = !source || "error" in source ? `不可用（${source?.error ?? "会话未开始"}）` : `${source.model} @ ${new URL(source.endpoint).host}`;
-				return [`eng-protocol：${isEnabled() ? "开" : "关"}`, `决策模型：${sourceLine}`, `最近一次引导：${getOutcomeLabel(outcome)}`].join("\n");
+				const sourceLine = !source || "error" in source ? `不可用（${source?.error ?? "会话未开始"}）` : source.provider === "local" ? "local（离线）" : `${source.provider} / ${source.model} @ ${new URL(source.endpoint).host}`;
+				return [`eng-protocol：${isEnabled() ? "开" : "关"}；mode=${currentConfig().agencyLevel}`, `决策模型：${sourceLine}`, `最近一次引导：${getOutcomeLabel(outcome)}`, `会话指标：${metricsLine()}`].join("\n");
 			},
 		},
 		on: {
@@ -330,26 +439,37 @@ export default function engProtocol(pi: ExtensionAPI) {
 			description: "显示规则状态、关系裁决、请求数量与实际注入内容",
 			run: () => {
 				if (!lastDecided) return `最近一次决策：${getOutcomeLabel(outcome)}\n本次未注入动态提醒。`;
-				const decided = lastDecided;
-				const labels = { selected: "已选", state: "无需注入", covered: "被覆盖", blocked: "行动受阻", prerequisite: "前置条件未解决", limit: "超出注入上限" };
+				const decided = outcome.kind === "decided" ? outcome : lastDecided;
+				const labels = { selected: "已选", state: "无需注入", covered: "被覆盖", blocked: "行动受阻", prerequisite: "前置条件未解决", limit: "超出注入上限", cooldown: "提醒冷却", arbitrated: "方向仲裁" };
 				const ranking = Object.entries(decided.assessments)
-					.sort(([, a], [, b]) => b.probabilities.needed - a.probabilities.needed)
+					.sort(([, a], [, b]) => (b.probabilities.needed ?? 0) - (a.probabilities.needed ?? 0))
 					.map(([id, assessment]) => {
 						const reason = decided.reasons[id];
-						return `${decided.cardIds.includes(id) ? "▶" : " "} ${assessment.probabilities.needed.toFixed(2)} ${getCardTitles([id])}：${RULE_STATE_LABELS[assessment.state]}；${labels[reason.kind]}${reason.by ? `（${getCardTitles([reason.by])}）` : ""}`;
+						return `${decided.cardIds.includes(id) ? "▶" : " "} ${assessment.probabilities.needed?.toFixed(2) ?? "—"} ${getCardTitles([id], cards())}：${RULE_STATE_LABELS[assessment.state]}；${labels[reason.kind]}${reason.by ? `（${getCardTitles([reason.by], cards())}）` : ""} [${assessment.source ?? "subq"}]`;
 					});
-				return [`协议文本：${PROTOCOL_PATH}`, `决策耗时：${decided.latencyMs}ms；${decided.questionCount} 个问题 / ${decided.batchCount} 个请求`, "以下状态为本次证据快照的模型判断，分数为 P(需要处理)。", ...ranking, `关系条件成立：${decided.activeRelations.join("、") || "无"}`, "", lastGuidance ?? "（本次未注入）"].join("\n");
+				return [`协议文本：${PROTOCOL_PATH}`, `决策来源：${decided.mode}${decided.errors.length ? `；${decided.errors.join("；")}` : ""}`, `决策耗时：${decided.latencyMs}ms；${decided.questionCount} 个问题 / ${decided.batchCount} 个请求`, `会话指标：${metricsLine()}`, "概率仅适用于 SubQ；结构化和本地状态不伪造概率。deferred 表示受预算限制未评估，不代表不适用。以下为最近决策，节流时未重新评估。", ...ranking, `关系条件成立：${decided.activeRelations.join("、") || "无"}`, "", lastGuidance ?? "（本次未注入）"].join("\n");
 			},
 		},
 	};
 
 	pi.registerCommand("protocol", {
-		description: "工程协议引导：status | on | off | reload | show",
-		getArgumentCompletions: (prefix) =>
-			Object.entries(SUBCOMMANDS)
+		description: "工程协议引导：status | on | off | reload | show | mode passive/balanced/proactive",
+		getArgumentCompletions: (prefix) => prefix.startsWith("mode ")
+			? ["passive", "balanced", "proactive"].filter((mode) => `mode ${mode}`.startsWith(prefix)).map((mode) => ({ value: `mode ${mode}`, label: mode }))
+			: Object.entries({ ...SUBCOMMANDS, mode: { description: "主动程度：passive | balanced | proactive" } })
 				.filter(([name]) => name.startsWith(prefix.trim()))
 				.map(([name, sub]) => ({ value: name, label: name, description: sub.description })),
 		handler: async (args, ctx) => {
+			if (args.trim().split(/\s+/)[0] === "mode") {
+				const parts = args.trim().split(/\s+/);
+				const mode = parts[1];
+				if (parts.length !== 2 || !["passive", "balanced", "proactive"].includes(mode)) { ctx.ui.notify("用法：/protocol mode passive|balanced|proactive", "warning"); return; }
+				agencyOverride = mode as ProtocolConfig["agencyLevel"];
+				resetDecision();
+				ctx.ui.notify(`主动模式：${mode}（本会话；下一次决策生效）`, "info");
+				updateStatus(ctx);
+				return;
+			}
 			const name = args.trim() || "status";
 			const sub = SUBCOMMANDS[name];
 			if (!sub) {

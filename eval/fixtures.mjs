@@ -1,7 +1,8 @@
 // Builds the six trap-task fixtures as git repos (one commit each) under ./fixtures.
 import { execFileSync } from "node:child_process";
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { dirname, join, resolve, sep } from "node:path";
+import { agentCaseDocument } from "./agent-cases.mjs";
 
 const ROOT = join(import.meta.dirname, "fixtures");
 const PKG = JSON.stringify({ name: "fixture", type: "module", scripts: { test: "node --test" }, dependencies: {} }, null, 2) + "\n";
@@ -105,6 +106,7 @@ test("unknown version", () => assert.throws(() => parseConfig('{ "version": 9 }'
 	},
 };
 
+if (!resolve(ROOT).startsWith(resolve(import.meta.dirname) + sep) || resolve(ROOT) !== resolve(import.meta.dirname, "fixtures")) throw new Error("Unsafe fixture target");
 rmSync(ROOT, { recursive: true, force: true });
 for (const [name, files] of Object.entries(FIXTURES)) {
 	const dir = join(ROOT, name);
@@ -118,3 +120,9 @@ for (const [name, files] of Object.entries(FIXTURES)) {
 	git("commit", "-q", "-m", "fixture");
 }
 console.log("fixtures:", Object.keys(FIXTURES).join(", "));
+// Frozen routing trajectories live alongside executable fixtures; they are not
+// automatically scored as completed coding tasks by run.mjs/score.mjs.
+const replayDir = join(ROOT, "agent-routing");
+mkdirSync(replayDir, { recursive: true });
+writeFileSync(join(replayDir, "cases.json"), JSON.stringify(agentCaseDocument, null, 2) + "\n");
+console.log("routing trajectories:", agentCaseDocument.cases.length);

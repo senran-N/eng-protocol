@@ -1,6 +1,25 @@
 {
   "reviewedAt": "2026-10-16",
-  "scope": "2026 primary sources; observed failures and vendor guidance are distinguished. Cards are behavioral mitigations, not model guarantees or model-name gates.",
+  "scope": "2026 primary sources; observed failures and vendor guidance are distinguished. Cards are behavioral mitigations, not model guarantees or model-name gates. Added engineering categories are separate from the empirical source registry.",
+  "categoriesReviewedAt": "2026-10-17",
+  "coverageMatrix": "coverage-matrix.json",
+  "engineeringCategories": {
+    "evidenceStatus": "User-proposed engineering risks and response strategies; no representative failure rates or causal attribution to RL/Transformer architecture established.",
+    "cases": "../eval/agent-cases.mjs",
+    "cards": [
+      { "id": "anti_reward_hacking", "category": "测试及类型约束完整性", "caseFamily": "reward" },
+      { "id": "thrashing", "category": "同目标受挫与诊断转向", "caseFamily": "thrashing" },
+      { "id": "abandoned_cleanup", "category": "方案替换与遗留", "caseFamily": "abandoned" },
+      { "id": "no_silent_swallow", "category": "内部契约与可诊断性", "caseFamily": "swallow" },
+      { "id": "reproduce_before_fix", "category": "故障触发证据", "caseFamily": "reproduce" },
+      { "id": "local_version_truth", "category": "本地解析版本", "caseFamily": "version" },
+      { "id": "artifact_cleanup", "category": "临时产物归属与清理", "caseFamily": "artifacts" },
+      { "id": "toolchain_gap", "category": "能力缺口与可靠替代", "caseFamily": "toolchain" },
+      { "id": "intent_discovery", "category": "目标分叉与结构化引导", "caseFamily": "intent" },
+      { "id": "leverage_proposal", "category": "有依据的替代方案", "caseFamily": "leverage" },
+      { "id": "foresight", "category": "具体后续影响", "caseFamily": "foresight" }
+    ]
+  },
   "sources": {
     "astra_behavior": {
       "title": "Using GPT-6 — GPT-6 Astra behavior / Prompting best practices",

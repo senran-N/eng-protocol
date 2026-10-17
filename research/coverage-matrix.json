@@ -1,0 +1,29 @@
+{
+  "reviewedAt": "2026-10-17",
+  "status": "engineering-taxonomy-not-a-completeness-proof",
+  "scope": "Each built-in card has one primary audit dimension. These dimensions are not mutually exclusive causal mechanisms and do not prove coverage of all possible agent failures. Unknown evidence and unscheduled cards remain explicit.",
+  "dimensions": [
+    { "id": "contracts", "title": "符号契约与实现不变量", "cards": ["modeling", "surgical", "control_flow", "cqs", "systems", "concurrency", "input_boundary", "ui", "no_silent_swallow"] },
+    { "id": "search", "title": "方案搜索、修正与遗留", "cards": ["thrashing", "two_strike", "abandoned_cleanup", "leverage_proposal"] },
+    { "id": "state", "title": "上下文、影响面与时序", "cards": ["topology", "navigation", "scope", "verify", "progress_visibility"] },
+    { "id": "environment", "title": "局部环境、版本与能力", "cards": ["research", "local_version_truth", "architecture", "compatibility", "toolchain_gap"] },
+    { "id": "objectives", "title": "真实目标、授权与指标完整性", "cards": ["halt", "no_cheat", "anti_reward_hacking", "reproduce_before_fix", "artifact_cleanup", "delivery", "reporting", "intent_discovery", "trust_boundary"] },
+    { "id": "epistemics", "title": "不确定性、证据与后续影响", "cards": ["context", "candor", "evidence_provenance", "foresight", "diagnostics", "verification_budget"] }
+  ],
+  "ownershipBoundaries": [
+    { "primary": "anti_reward_hacking", "neighbor": "no_cheat", "boundary": "实际削弱检查 vs 权威契约冲突与其他作弊；可无损合并，不自动认定改测试违规。" },
+    { "primary": "thrashing", "neighbor": "two_strike", "boundary": "命令/环境重复受挫 vs 两次同因修复-验证循环；保留各自证据门槛。" },
+    { "primary": "reproduce_before_fix", "neighbor": "context", "boundary": "故障触发路径证据 vs 其他关键因果假设；同一义务才覆盖。" },
+    { "primary": "local_version_truth", "neighbor": "research", "boundary": "项目实际解析版本及接口 vs 独立外部问题；本地检查不免除必要研究。" },
+    { "primary": "abandoned_cleanup", "neighbor": "artifact_cleanup", "boundary": "被替代实现残留 vs 明确临时调试副作用；不删除用户工作或永久测试。" },
+    { "primary": "intent_discovery", "neighbor": "halt", "boundary": "产品目标关键分叉 vs 独立授权/破坏性风险；已明确选择不重新提问。" },
+    { "primary": "leverage_proposal", "neighbor": "scope", "boundary": "讨论有依据的替代方案 vs 未授权实施扩展；讨论不授权改代码。" },
+    { "primary": "foresight", "neighbor": "compatibility", "boundary": "具体后续影响沟通 vs 当前范围内必须完成的迁移；不把必要工作包装成可选追加。" },
+    { "primary": "toolchain_gap", "neighbor": "delivery", "boundary": "真实且不可自行解决的能力阻塞 vs 无阻塞却提前停工；可靠小脚本并不违规。" }
+  ],
+  "foundationalReferences": [
+    { "url": "https://arxiv.org/abs/2305.10601", "title": "Tree of Thoughts", "finding": "外部搜索框架可比较、评估与回溯推理路径。", "limit": "研究中的特定任务结果不能证明本插件效果，也不意味着每个任务应强制多路径。" },
+    { "url": "https://arxiv.org/abs/2207.05221", "title": "Language Models (Mostly) Know What They Know", "finding": "特定格式与任务上观察到自我评估/校准能力，并存在跨任务泛化限制。", "limit": "不能断言模型完全没有不确定性判断，也不能将自报置信度直接视为可靠概率。" },
+    { "url": "https://arxiv.org/abs/2203.02155", "title": "Training language models to follow instructions with human feedback", "finding": "后训练优化可改变模型策略。", "limit": "示意中的 RL 策略不能不加定义地作为独立的逐 token 后置乘子；这不证明任何具体失败由 RL 导致。" }
+  ]
+}
